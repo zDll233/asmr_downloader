@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 
+const _simplePrint = true;
+
 class Log {
   static final Log _instance = Log._internal();
 
@@ -39,7 +41,7 @@ class Log {
   // 提供静态方法获取 Logger 实例
   static Logger get logger => _instance._logger;
 
-  static void trace(String message, {bool simplePrint = false}) {
+  static void trace(String message, {bool simplePrint = _simplePrint}) {
     if (simplePrint) {
       _instance._simpleLogger.t(message);
     } else {
@@ -47,7 +49,7 @@ class Log {
     }
   }
 
-  static void debug(String message, {bool simplePrint = false}) {
+  static void debug(String message, {bool simplePrint = _simplePrint}) {
     if (simplePrint) {
       _instance._simpleLogger.d(message);
     } else {
@@ -55,7 +57,7 @@ class Log {
     }
   }
 
-  static void info(String message, {bool simplePrint = false}) {
+  static void info(String message, {bool simplePrint = _simplePrint}) {
     if (simplePrint) {
       _instance._simpleLogger.i(message);
     } else {
@@ -63,7 +65,7 @@ class Log {
     }
   }
 
-  static void warning(String message, {bool simplePrint = false}) {
+  static void warning(String message, {bool simplePrint = _simplePrint}) {
     if (simplePrint) {
       _instance._simpleLogger.w(message);
     } else {
@@ -73,7 +75,7 @@ class Log {
 
   static void error(
     String message, {
-    bool simplePrint = false,
+    bool simplePrint = _simplePrint,
     DateTime? time,
     Object? error,
     StackTrace? stackTrace,
@@ -90,7 +92,7 @@ class Log {
     }
   }
 
-  static void fatal(String message, {bool simplePrint = false}) {
+  static void fatal(String message, {bool simplePrint = _simplePrint}) {
     if (simplePrint) {
       _instance._simpleLogger.e(message);
     } else {

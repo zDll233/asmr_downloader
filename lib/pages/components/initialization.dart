@@ -13,7 +13,6 @@ class _InitializationState extends ConsumerState<Initialization> {
   @override
   void initState() {
     super.initState();
-
     // init
   }
 
@@ -45,4 +44,6 @@ class _InitializationState extends ConsumerState<Initialization> {
 
 final _initProvider = FutureProvider.autoDispose((ref) async {
   // async init
+
+  // await ref.read(asmrApiProvider).login();
 });

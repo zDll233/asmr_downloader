@@ -25,10 +25,12 @@ Future<void> setupWindow(List<String> args) async {
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.hidden,
     );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.setMinimumSize(initialSize);
-      await windowManager.show();
-      await windowManager.focus();
+    windowManager.waitUntilReadyToShow(windowOptions, () {
+      windowManager
+        ..setMinimumSize(initialSize)
+        ..setTitle('ASMR Downloader')
+        ..show()
+        ..focus();
     });
   }
 }
