@@ -22,46 +22,48 @@ class SearchBoxState extends State<SearchBox> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Row(
-          children: [
-            SizedBox(
-              width: 200,
-              child: TextField(
-                controller: _controller,
-                cursorColor: _color,
-                decoration: InputDecoration(
-                  hintText: '输入RJ号',
-                  border: OutlineInputBorder(),
-                  focusedBorder:
-                      OutlineInputBorder(borderSide: BorderSide(color: _color)),
+    return SizedBox(
+      height: 100.0,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 200,
+                child: TextField(
+                  controller: _controller,
+                  cursorColor: _color,
+                  decoration: InputDecoration(
+                    hintText: '输入RJ号',
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: _color)),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _inputText = value;
+                    });
+                  },
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    _inputText = value;
-                  });
-                },
               ),
-            ),
-            Consumer(builder: (context, ref, _) {
-              return IconButton(
-                onPressed: () =>
-                    ref.read(rjProvider.notifier).state = _inputText,
-                icon: Icon(Icons.search),
-              );
-            }),
-          ],
-        ),
-        SizedBox(height: 20),
-        Consumer(builder: (context, ref, _) {
-          return Text(
-            '搜索: ${ref.watch(rjProvider)}',
-            style: TextStyle(color: _color),
-          );
-        }),
-      ],
+              Consumer(builder: (context, ref, _) {
+                return IconButton(
+                  onPressed: () =>
+                      ref.read(rjProvider.notifier).state = _inputText,
+                  icon: Icon(Icons.search),
+                );
+              }),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('Search Result',
+                style: Theme.of(context).textTheme.titleMedium),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -7,8 +7,7 @@ class Downloader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 250,
+    return Expanded(
       child: Column(
         children: [
           SearchBox(),

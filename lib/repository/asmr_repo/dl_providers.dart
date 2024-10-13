@@ -1,3 +1,5 @@
+import 'package:asmr_downloader/model/track_item.dart';
+import 'package:asmr_downloader/pages/downloader/components/tracks/get_track_items.dart';
 import 'package:asmr_downloader/repository/asmr_repo/asmr_api.dart';
 import 'package:asmr_downloader/utils/log.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,5 +71,22 @@ final coverUrlProvider = Provider<String>((ref) {
       return data['mainCoverUrl'].toString();
     },
     orElse: () => '',
+  );
+});
+
+final rootFolderProvider = StateProvider<Folder>((ref) {
+  final rj = ref.read(rjProvider);
+  final trackItemsAsync = ref.watch(tracksProvider);
+  final emptyFolder = Folder(title: 'root');
+  return trackItemsAsync.maybeWhen(
+    data: (data) {
+      if (data == null) {
+        return emptyFolder;
+      }
+      return Folder(title: rj)
+        ..depth = 0
+        ..children = getTrackItems(data);
+    },
+    orElse: () => emptyFolder,
   );
 });

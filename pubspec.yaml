@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   dio: ^5.7.0
+  file_picker: ^8.1.2
   flutter:
     sdk: flutter
   flutter_acrylic: ^1.1.4
