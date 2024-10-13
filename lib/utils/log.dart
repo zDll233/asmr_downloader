@@ -13,7 +13,7 @@ class Log {
 
   // named constructor
   Log._internal() {
-    final File logFile = File(p.join('debug', 'again.log'));
+    final File logFile = File(p.join('debug', 'asmr_downloader.log'));
     if (!logFile.existsSync()) {
       logFile.createSync(recursive: true);
     }
