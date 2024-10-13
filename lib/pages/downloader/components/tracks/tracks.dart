@@ -1,17 +1,27 @@
 import 'package:asmr_downloader/model/track_item.dart';
+import 'package:asmr_downloader/repository/asmr_repo/dl_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const double _lPadding = 20.0;
 
-class Tracks extends StatefulWidget {
+class Tracks extends ConsumerStatefulWidget {
   const Tracks({super.key, required this.rootFolder});
   final Folder rootFolder;
 
   @override
-  State<Tracks> createState() => TracksState();
+  ConsumerState<Tracks> createState() => TracksState();
 }
 
-class TracksState extends State<Tracks> {
+class TracksState extends ConsumerState<Tracks> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(rootFolderProvider.notifier).state = widget.rootFolder;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(children: trackExpansion(widget.rootFolder));
@@ -32,6 +42,8 @@ class TracksState extends State<Tracks> {
                   setState(() {
                     track.setSelection(newValue);
                   });
+                  ref.read(rootFolderProvider.notifier).state =
+                      widget.rootFolder;
                 }),
             title: Text(track.title),
             children: track.children
@@ -51,6 +63,7 @@ class TracksState extends State<Tracks> {
               setState(() {
                 track.selected = newValue;
               });
+              ref.read(rootFolderProvider.notifier).state = widget.rootFolder;
             },
             title: Row(
               children: [

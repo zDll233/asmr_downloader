@@ -2,8 +2,9 @@ class TrackItem {
   String type;
   String title;
   int depth = -1;
-  String path = '';
+  List<String> pathLs = [];
   bool selected = true;
+
 
   TrackItem({
     required this.type,

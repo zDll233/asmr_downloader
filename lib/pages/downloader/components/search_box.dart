@@ -50,8 +50,11 @@ class SearchBoxState extends State<SearchBox> {
               ),
               Consumer(builder: (context, ref, _) {
                 return IconButton(
-                  onPressed: () =>
-                      ref.read(rjProvider.notifier).state = _inputText,
+                  onPressed: () {
+                    final rj =
+                        _inputText.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
+                    ref.read(rjProvider.notifier).state = rj;
+                  },
                   icon: Icon(Icons.search),
                 );
               }),

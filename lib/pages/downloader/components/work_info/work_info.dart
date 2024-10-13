@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:asmr_downloader/model/track_item.dart';
 import 'package:asmr_downloader/repository/asmr_repo/dl_providers.dart';
+import 'package:asmr_downloader/utils/log.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,30 +44,38 @@ class WorkInfo extends StatelessWidget {
                       children: [...cvLs.map((e) => Text(e))],
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.only(top: 20.0),
                       child: TextButton(
                           style: TextButton.styleFrom(
                               backgroundColor: Colors.blueGrey),
                           onPressed: () {
-                            // 创建目录
-                            final baseDirPath = r'E:\Media\ACG\音声\Marked';
-                            // cv1&cv2&...&cvn-title
-                            final dirName = '${cvLs.join('&')}-$title';
-                            final targetDirPath = p.join(
-                                baseDirPath, dirName, ref.read(rjProvider));
-                            Directory(targetDirPath)
-                                .createSync(recursive: true);
-
-                            // 下载cover
-                            String coverPath =
-                                p.join(targetDirPath, 'cover.jpg');
-                            final dio = Dio();
-                            dio.download(coverUrl, coverPath);
+                            final downloadPath = ref.read(downloadPathProvider);
+                            voiceWorkDirAndCover(
+                                ref, title, cvLs, coverUrl, downloadPath);
                           },
                           child: Text(
                             '创建目录&下载cover',
                             style: TextStyle(color: Colors.white70),
                           )),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 15.0),
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                            backgroundColor: Colors.pink[200]),
+                        onPressed: () {
+                          final downloadPath = ref.read(downloadPathProvider);
+                          final voiceWorkDirName = '${cvLs.join('&')}-$title';
+                          final rootFolder = ref.read(rootFolderProvider);
+
+                          voiceWorkDirAndCover(
+                              ref, title, cvLs, coverUrl, downloadPath);
+                          downloadTrackItem(rootFolder,
+                              p.join(downloadPath, voiceWorkDirName));
+                        },
+                        child:
+                            Text('下载', style: TextStyle(color: Colors.white70)),
+                      ),
                     ),
                   ],
                 );
@@ -77,5 +87,48 @@ class WorkInfo extends StatelessWidget {
         }),
       ),
     );
+  }
+
+  Future<void> voiceWorkDirAndCover(
+    WidgetRef ref,
+    String title,
+    List<String> cvLs,
+    String coverUrl,
+    String downloadPath,
+  ) async {
+    // cv1&cv2&...&cvn-title
+    final dirName = '${cvLs.join('&')}-$title';
+    final rjDirPath = p.join(
+      downloadPath,
+      dirName,
+      ref.read(rjProvider),
+    );
+    Log.info('Creating directory $rjDirPath');
+    Directory(rjDirPath).createSync(recursive: true);
+
+    // 下载cover
+    String coverPath = p.join(rjDirPath, 'cover.jpg');
+    await Dio().download(coverUrl, coverPath);
+    Log.info('Download cover to $coverPath successfully');
+  }
+}
+
+void downloadTrackItem(TrackItem trackItem, String targetDirPath) {
+  if (trackItem is Folder) {
+    final dirPath = p.join(targetDirPath, trackItem.title);
+    Log.info('Creating directory $dirPath');
+    Directory(dirPath).createSync(recursive: true);
+    for (final child in trackItem.children) {
+      downloadTrackItem(child, dirPath);
+    }
+  } else if (trackItem is FileAsset) {
+    final dio = Dio();
+    final targetPath = p.join(targetDirPath, trackItem.title);
+    if (trackItem.selected) {
+      Log.info('Downloading ${trackItem.title} to $targetPath');
+      dio.download(trackItem.mediaDownloadUrl, targetPath);
+    } else {
+      Log.info('Skipping ${trackItem.title}');
+    }
   }
 }

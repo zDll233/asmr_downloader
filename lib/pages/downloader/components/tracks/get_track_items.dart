@@ -1,18 +1,23 @@
 import 'package:asmr_downloader/model/track_item.dart';
 
 List<TrackItem> getTrackItems(List<dynamic> tracks,
-    {int depth = 1, String basePath = ''}) {
+    {int depth = 1, List<String> basePathLs = const []}) {
   List<TrackItem> trackItems = [];
   for (final track in tracks) {
     final title = track['title'];
     final type = track['type'];
+    final newPathLs =
+        basePathLs + [title.replaceAll(RegExp(r'[<>:"/\\|?*]'), '')];
     if (type == 'folder') {
       Folder folder = Folder(title: title);
       folder.depth = depth;
-      folder.path = '$basePath/$title';
+      folder.pathLs = newPathLs;
 
-      folder.children = getTrackItems(track['children'],
-          depth: depth + 1, basePath: folder.path);
+      folder.children = getTrackItems(
+        track['children'],
+        depth: depth + 1,
+        basePathLs: folder.pathLs,
+      );
       trackItems.add(folder);
     } else if (track['type'] == 'audio') {
       AudioAsset audioAsset = AudioAsset(
@@ -23,7 +28,7 @@ List<TrackItem> getTrackItems(List<dynamic> tracks,
         duration: track['duration'],
       );
       audioAsset.depth = depth;
-      audioAsset.path = '$basePath/$title';
+      audioAsset.pathLs = newPathLs;
       trackItems.add(audioAsset);
     } else if (track['type'] == 'image') {
       ImageAsset imageAsset = ImageAsset(
@@ -33,7 +38,7 @@ List<TrackItem> getTrackItems(List<dynamic> tracks,
         size: track['size'],
       );
       imageAsset.depth = depth;
-      imageAsset.path = '$basePath/$title';
+      imageAsset.pathLs = newPathLs;
       trackItems.add(imageAsset);
     } else if (track['type'] == 'text') {
       TextAsset textAsset = TextAsset(
@@ -43,7 +48,7 @@ List<TrackItem> getTrackItems(List<dynamic> tracks,
         size: track['size'],
       );
       textAsset.depth = depth;
-      textAsset.path = '$basePath/$title';
+      textAsset.pathLs = newPathLs;
       trackItems.add(textAsset);
     }
   }
