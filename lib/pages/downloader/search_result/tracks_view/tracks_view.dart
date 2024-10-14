@@ -1,7 +1,7 @@
 import 'package:asmr_downloader/model/track_item.dart';
-import 'package:asmr_downloader/pages/downloader/search_result/components/download_track_item.dart';
-import 'package:asmr_downloader/pages/downloader/search_result/components/get_track_items.dart';
-import 'package:asmr_downloader/pages/downloader/search_result/components/voice_work_dir_and_cover.dart';
+import 'package:asmr_downloader/presentation/download_track_item.dart';
+import 'package:asmr_downloader/presentation/get_track_items.dart';
+import 'package:asmr_downloader/presentation/voice_work_dir_and_cover.dart';
 import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/tracks.dart';
 import 'package:asmr_downloader/repository/asmr_repo/dl_providers.dart';
 import 'package:flutter/material.dart';
@@ -14,10 +14,6 @@ class TracksView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tracks = ref.watch(tracksProvider);
-    final rj = ref.watch(rjProvider);
-    final title = ref.watch(titleProvider);
-    final cvLs = ref.watch(cvLsProvider);
-    final coverUrl = ref.watch(coverUrlProvider);
     final appWidth = MediaQuery.of(context).size.width;
     return SizedBox(
       width: appWidth * 0.6,
@@ -29,8 +25,11 @@ class TracksView extends ConsumerWidget {
               if (data == null) {
                 return Text('No tracks');
               }
+              final rj = ref.read(rjProvider);
+              final title = ref.read(titleProvider);
+              final cvLs = ref.read(cvLsProvider);
+              final coverUrl = ref.read(coverUrlProvider);
               final rootFolder = Folder(title: rj)
-                ..depth = 0
                 ..children = getTrackItems(data);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,9 +45,9 @@ class TracksView extends ConsumerWidget {
                         final rootFolder = ref.read(rootFolderProvider);
 
                         voiceWorkDirAndCover(
-                            ref, title, cvLs, coverUrl, downloadPath);
-                        downloadTrackItem(ref, rootFolder,
-                            p.join(downloadPath, voiceWorkDirName));
+                            rj, title, cvLs, coverUrl, downloadPath);
+                        downloadTrackItem(
+                            rootFolder, p.join(downloadPath, voiceWorkDirName));
                       },
                       child:
                           Text('下载', style: TextStyle(color: Colors.white70)),

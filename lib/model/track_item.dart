@@ -1,7 +1,6 @@
 class TrackItem {
   String type;
   String title;
-  int depth = -1;
   List<String> pathLs = [];
   bool selected = true;
 

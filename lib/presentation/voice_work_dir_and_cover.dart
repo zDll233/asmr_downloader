@@ -1,31 +1,30 @@
 import 'dart:io';
-import 'package:asmr_downloader/repository/asmr_repo/dl_providers.dart';
+import 'package:asmr_downloader/utils/download.dart';
 import 'package:asmr_downloader/utils/log.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 Future<void> voiceWorkDirAndCover(
-  WidgetRef ref,
+  String rj,
   String title,
   List<String> cvLs,
   String coverUrl,
   String downloadPath,
 ) async {
-  final api = ref.read(asmrApiProvider);
-
   // cv1&cv2&...&cvn-title
   final dirName = '${cvLs.join('&')}-$title';
   final rjDirPath = p.join(
     downloadPath,
     dirName,
-    ref.read(rjProvider),
+    rj,
   );
-  Log.info('Creating directory $rjDirPath');
+  Log.i('Creating directory $rjDirPath');
   Directory(rjDirPath).createSync(recursive: true);
 
   // 下载cover
   String coverPath = p.join(rjDirPath, 'cover.jpg');
-  // await Dio().download(coverUrl, coverPath);
-  await api.download(coverUrl, coverPath);
-  Log.info('Download cover to $coverPath successfully');
+  try {
+    await dioDownload(coverUrl, coverPath);
+  } catch (e) {
+    Log.error('Download cover failed: $e');
+  }
 }

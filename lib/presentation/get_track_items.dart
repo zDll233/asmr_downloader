@@ -1,21 +1,19 @@
 import 'package:asmr_downloader/model/track_item.dart';
+import 'package:collection/collection.dart';
 
 List<TrackItem> getTrackItems(List<dynamic> tracks,
-    {int depth = 1, List<String> basePathLs = const []}) {
+    {List<String> basePathLs = const []}) {
   List<TrackItem> trackItems = [];
   for (final track in tracks) {
     final title = track['title'];
     final type = track['type'];
-    final newPathLs =
-        basePathLs + [title.replaceAll(RegExp(r'[<>:"/\\|?*]'), '')];
+    final newPathLs = basePathLs + [title];
     if (type == 'folder') {
       Folder folder = Folder(title: title);
-      folder.depth = depth;
       folder.pathLs = newPathLs;
 
       folder.children = getTrackItems(
         track['children'],
-        depth: depth + 1,
         basePathLs: folder.pathLs,
       );
       trackItems.add(folder);
@@ -27,7 +25,6 @@ List<TrackItem> getTrackItems(List<dynamic> tracks,
         size: track['size'],
         duration: track['duration'],
       );
-      audioAsset.depth = depth;
       audioAsset.pathLs = newPathLs;
       trackItems.add(audioAsset);
     } else if (track['type'] == 'image') {
@@ -37,7 +34,6 @@ List<TrackItem> getTrackItems(List<dynamic> tracks,
         mediaDownloadUrl: track['mediaDownloadUrl'],
         size: track['size'],
       );
-      imageAsset.depth = depth;
       imageAsset.pathLs = newPathLs;
       trackItems.add(imageAsset);
     } else if (track['type'] == 'text') {
@@ -47,10 +43,26 @@ List<TrackItem> getTrackItems(List<dynamic> tracks,
         mediaDownloadUrl: track['mediaDownloadUrl'],
         size: track['size'],
       );
-      textAsset.depth = depth;
       textAsset.pathLs = newPathLs;
       trackItems.add(textAsset);
     }
   }
+
+  sortTrackItems(trackItems);
+
   return trackItems;
+}
+
+// sort trackItems by type: folder, fileAsset
+// when type is the same, sort by title
+void sortTrackItems(List<TrackItem> trackItems) {
+  trackItems.sort((a, b) {
+    if (a is Folder && b is! Folder) {
+      return -1;
+    } else if (a is! Folder && b is Folder) {
+      return 1;
+    } else {
+      return compareNatural(a.title, b.title);
+    }
+  });
 }

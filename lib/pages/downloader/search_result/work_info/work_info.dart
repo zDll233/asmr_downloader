@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/pages/downloader/search_result/components/voice_work_dir_and_cover.dart';
+import 'package:asmr_downloader/presentation/voice_work_dir_and_cover.dart';
 import 'package:asmr_downloader/repository/asmr_repo/dl_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,8 +36,9 @@ class WorkInfo extends StatelessWidget {
                               backgroundColor: Colors.blueGrey),
                           onPressed: () {
                             final downloadPath = ref.read(downloadPathProvider);
+                            final rj = ref.read(rjProvider);
                             voiceWorkDirAndCover(
-                                ref, title, cvLs, coverUrl, downloadPath);
+                                rj, title, cvLs, coverUrl, downloadPath);
                           },
                           child: Text(
                             '创建目录&下载cover',
