@@ -1,5 +1,5 @@
 import 'package:asmr_downloader/common/const.dart';
-import 'package:asmr_downloader/repository/asmr_repo/dl_providers.dart';
+import 'package:asmr_downloader/download/dowbload_providers.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,9 +1,10 @@
+import 'package:dio/dio.dart';
+
 class TrackItem {
   String type;
   String title;
   List<String> pathLs = [];
-  bool selected = true;
-
+  bool selected = false;
 
   TrackItem({
     required this.type,
@@ -30,47 +31,29 @@ class Folder extends TrackItem {
   }
 }
 
+enum DownloadStatus { notStarted, downloading, completed, failed, canceled }
+
 class FileAsset extends TrackItem {
+  String hash;
   String mediaStreamUrl;
   String mediaDownloadUrl;
   int size;
+
+  String savePath;
+  DownloadStatus status;
+  double progress;
+  CancelToken cancelToken;
+
   FileAsset({
     required super.type,
     required super.title,
     required this.mediaStreamUrl,
     required this.mediaDownloadUrl,
     required this.size,
-  });
-}
-
-class AudioAsset extends FileAsset {
-  double duration;
-  AudioAsset({
-    super.type = 'audio',
-    required super.title,
-    required super.mediaStreamUrl,
-    required super.mediaDownloadUrl,
-    required this.duration,
-    required super.size,
-  });
-}
-
-class ImageAsset extends FileAsset {
-  ImageAsset({
-    super.type = 'image',
-    required super.title,
-    required super.mediaStreamUrl,
-    required super.mediaDownloadUrl,
-    required super.size,
-  });
-}
-
-class TextAsset extends FileAsset {
-  TextAsset({
-    super.type = 'text',
-    required super.title,
-    required super.mediaStreamUrl,
-    required super.mediaDownloadUrl,
-    required super.size,
-  });
+    required this.hash,
+    this.savePath = '',
+    this.status = DownloadStatus.notStarted,
+    this.progress = 0.0,
+    CancelToken? cancelToken,
+  }) : cancelToken = cancelToken ?? CancelToken();
 }

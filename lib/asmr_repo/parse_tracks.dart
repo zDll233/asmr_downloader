@@ -17,34 +17,17 @@ List<TrackItem> getTrackItems(List<dynamic> tracks,
         basePathLs: folder.pathLs,
       );
       trackItems.add(folder);
-    } else if (track['type'] == 'audio') {
-      AudioAsset audioAsset = AudioAsset(
-        title: track['title'],
-        mediaStreamUrl: track['mediaStreamUrl'],
-        mediaDownloadUrl: track['mediaDownloadUrl'],
-        size: track['size'],
-        duration: track['duration'],
-      );
-      audioAsset.pathLs = newPathLs;
-      trackItems.add(audioAsset);
-    } else if (track['type'] == 'image') {
-      ImageAsset imageAsset = ImageAsset(
-        title: track['title'],
+    } else {
+      FileAsset fileAsset = FileAsset(
+        hash: track['hash'],
+        type: type,
+        title: title,
         mediaStreamUrl: track['mediaStreamUrl'],
         mediaDownloadUrl: track['mediaDownloadUrl'],
         size: track['size'],
       );
-      imageAsset.pathLs = newPathLs;
-      trackItems.add(imageAsset);
-    } else if (track['type'] == 'text') {
-      TextAsset textAsset = TextAsset(
-        title: track['title'],
-        mediaStreamUrl: track['mediaStreamUrl'],
-        mediaDownloadUrl: track['mediaDownloadUrl'],
-        size: track['size'],
-      );
-      textAsset.pathLs = newPathLs;
-      trackItems.add(textAsset);
+      fileAsset.pathLs = newPathLs;
+      trackItems.add(fileAsset);
     }
   }
 
