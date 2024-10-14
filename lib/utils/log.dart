@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 
-const _simplePrint = true;
-
 class Log {
   static final Log _instance = Log._internal();
 
@@ -21,7 +19,7 @@ class Log {
     _logger = kDebugMode
         ? Logger(
             printer: PrettyPrinter(
-              methodCount: 5,
+              methodCount: 2,
               dateTimeFormat: DateTimeFormat.dateAndTime,
             ),
           )
@@ -41,62 +39,61 @@ class Log {
   // 提供静态方法获取 Logger 实例
   static Logger get logger => _instance._logger;
 
-  static void trace(String message, {bool simplePrint = _simplePrint}) {
-    if (simplePrint) {
-      _instance._simpleLogger.t(message);
-    } else {
-      _instance._logger.t(message);
-    }
+  static void trace(String message) {
+    _instance._logger.t(message);
   }
 
-  static void debug(String message, {bool simplePrint = _simplePrint}) {
-    if (simplePrint) {
-      _instance._simpleLogger.d(message);
-    } else {
-      _instance._logger.d(message);
-    }
+  static void t(String message) {
+    _instance._simpleLogger.t(message);
   }
 
-  static void info(String message, {bool simplePrint = _simplePrint}) {
-    if (simplePrint) {
-      _instance._simpleLogger.i(message);
-    } else {
-      _instance._logger.i(message);
-    }
+  static void debug(String message) {
+    _instance._logger.d(message);
   }
 
-  static void warning(String message, {bool simplePrint = _simplePrint}) {
-    if (simplePrint) {
-      _instance._simpleLogger.w(message);
-    } else {
-      _instance._logger.w(message);
-    }
+  static void d(String message) {
+    _instance._simpleLogger.d(message);
+  }
+
+  static void info(String message) {
+    _instance._logger.i(message);
+  }
+
+  static void i(String message) {
+    _instance._simpleLogger.i(message);
+  }
+
+  static void warning(String message) {
+    _instance._logger.w(message);
+  }
+
+  static void w(String message) {
+    _instance._simpleLogger.w(message);
   }
 
   static void error(
     String message, {
-    bool simplePrint = _simplePrint,
     DateTime? time,
     Object? error,
     StackTrace? stackTrace,
   }) {
-    if (simplePrint) {
-      _instance._simpleLogger.e(message);
-    } else {
-      _instance._logger.e(
-        message,
-        time: time,
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
+    _instance._logger.e(
+      message,
+      time: time,
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
-  static void fatal(String message, {bool simplePrint = _simplePrint}) {
-    if (simplePrint) {
-      _instance._simpleLogger.e(message);
-    } else {
-      _instance._logger.e(message);
-    }
+  static void e(String message) {
+    _instance._simpleLogger.e(message);
+  }
+
+  static void fatal(String message) {
+    _instance._logger.f(message);
+  }
+
+  static void f(String message) {
+    _instance._simpleLogger.f(message);
   }
 }

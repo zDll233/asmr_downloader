@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/pages/downloader/components/voice_work_dir_and_cover.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/components/voice_work_dir_and_cover.dart';
 import 'package:asmr_downloader/repository/asmr_repo/dl_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,9 +46,11 @@ class WorkInfo extends StatelessWidget {
                     ),
                     Image.network(coverUrl),
                     Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                      child: Text(title,
-                          style: Theme.of(context).textTheme.titleMedium),
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                      child: Text(
+                        title,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                     ),
                     Wrap(
                       alignment: WrapAlignment.spaceEvenly,

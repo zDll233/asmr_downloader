@@ -1,8 +1,8 @@
 import 'package:asmr_downloader/model/track_item.dart';
-import 'package:asmr_downloader/pages/downloader/components/download_track_item.dart';
-import 'package:asmr_downloader/pages/downloader/components/get_track_items.dart';
-import 'package:asmr_downloader/pages/downloader/components/voice_work_dir_and_cover.dart';
-import 'package:asmr_downloader/pages/downloader/search_result/tracks/tracks.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/components/download_track_item.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/components/get_track_items.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/components/voice_work_dir_and_cover.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/tracks.dart';
 import 'package:asmr_downloader/repository/asmr_repo/dl_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

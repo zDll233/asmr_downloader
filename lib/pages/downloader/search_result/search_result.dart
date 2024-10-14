@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/pages/downloader/search_result/tracks/tracks_view.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/tracks_view.dart';
 import 'package:asmr_downloader/pages/downloader/search_result/work_info/work_info.dart';
 import 'package:flutter/material.dart';
 
