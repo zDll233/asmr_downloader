@@ -1,5 +1,5 @@
-import 'package:asmr_downloader/pages/downloader/components/search_box.dart';
-import 'package:asmr_downloader/pages/downloader/components/search_result.dart';
+import 'package:asmr_downloader/pages/downloader/search_box.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/search_result.dart';
 import 'package:flutter/material.dart';
 
 class Downloader extends StatelessWidget {

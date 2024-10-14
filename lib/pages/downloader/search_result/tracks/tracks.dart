@@ -3,6 +3,7 @@ import 'package:asmr_downloader/repository/asmr_repo/dl_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+
 const double _lPadding = 20.0;
 
 class Tracks extends ConsumerStatefulWidget {
@@ -24,7 +25,9 @@ class TracksState extends ConsumerState<Tracks> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(children: trackExpansion(widget.rootFolder));
+    return ListView(
+      children: trackExpansion(widget.rootFolder),
+    );
   }
 
   List<Widget> trackExpansion(TrackItem track) {

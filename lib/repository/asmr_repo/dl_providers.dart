@@ -12,6 +12,7 @@ final asmrApiProvider = Provider<AsmrApi>((ref) {
   return AsmrApi(
     name: 'moondasscry',
     password: 'lzd951413',
+    proxy: '127.0.0.1:7890',
   );
 });
 

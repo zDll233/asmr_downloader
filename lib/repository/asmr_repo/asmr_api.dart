@@ -238,4 +238,16 @@ class AsmrApi {
     final id = rj.replaceAll(RegExp(r'[^0-9]'), '');
     return await get('tracks/$id');
   }
+
+  Future<void> download(String url, String savePath,
+      {void Function(int, int)? onReceiveProgress}) async {
+    try {
+      await _dio.download(url, savePath, onReceiveProgress: onReceiveProgress);
+      Log.info('Downloaded to "$savePath"');
+    } on DioException catch (e) {
+      Log.error('Download failed: ${e.message}');
+    } catch (e) {
+      Log.error('Unexpected error during download: $e');
+    }
+  }
 }

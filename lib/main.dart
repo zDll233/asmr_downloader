@@ -28,7 +28,7 @@ Future<void> setupWindow(List<String> args) async {
     windowManager.waitUntilReadyToShow(windowOptions, () {
       windowManager
         ..setMinimumSize(initialSize)
-        ..setTitle('ASMR Downloader')
+        ..setTitle('ASMRDownloader')
         ..show()
         ..focus();
     });
