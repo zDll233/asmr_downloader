@@ -9,18 +9,17 @@ import 'package:path/path.dart' as p;
 
 class DownloadManager {
   final WidgetRef ref;
-  final String rjDirPath;
-  DownloadManager({required this.ref})
-      : rjDirPath = ref.read(rjDirPathProvider);
+  DownloadManager({required this.ref});
 
   final Dio _dio = Dio();
 
   Future<void> run() async {
     // cover + rootFolder
     ref.read(totalTaskCntProvider.notifier).state =
-        totalTaskCount(ref.read(rootFolderProvider)) + 1;
+        totalTaskCount(ref.read(rootFolderProvider));
     await downloadCover();
 
+    final rjDirPath = ref.read(rjDirPathProvider);
     await _downloadTrackItem(ref.read(rootFolderProvider), rjDirPath);
     ref.read(currentDlProvider.notifier).state = 0;
     ref.read(totalTaskCntProvider.notifier).state = 0;
@@ -42,6 +41,7 @@ class DownloadManager {
     final coverUrl = ref.read(coverUrlProvider);
 
     // 下载cover
+    final rjDirPath = ref.read(rjDirPathProvider);
     String coverPath = p.join(rjDirPath, 'cover.jpg');
     FileAsset coverFile = FileAsset(
       id: 'cover',
@@ -71,6 +71,7 @@ class DownloadManager {
       if (trackItem.selected) {
         try {
           trackItem.savePath = targetPath;
+          ref.read(currentDlProvider.notifier).state++;
           await _downloadTask(trackItem);
         } catch (e) {
           Log.error('Download ${trackItem.title} failed: $e');
@@ -86,7 +87,7 @@ class DownloadManager {
     try {
       ref.read(currentFileNameProvider.notifier).state = task.title;
       ref.read(processProvider.notifier).state = 0;
-      ref.read(currentDlProvider.notifier).state++;
+      // ref.read(currentDlProvider.notifier).state++;
       await _dioDownload(
         task.mediaDownloadUrl,
         task.savePath,
