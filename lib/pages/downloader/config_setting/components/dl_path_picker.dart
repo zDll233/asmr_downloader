@@ -1,5 +1,5 @@
-import 'package:asmr_downloader/common/const.dart';
-import 'package:asmr_downloader/download/dowbload_providers.dart';
+import 'package:asmr_downloader/common/config.dart';
+import 'package:asmr_downloader/download/download_providers.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +24,7 @@ class DownloadPathPicker extends ConsumerWidget {
                 enabled: false,
                 cursorColor: _color,
                 decoration: InputDecoration(
-                  hintText: dlPath.isEmpty ? 'pick download path' : dlPath,
+                  hintText: dlPath.isEmpty ? '选择下载路径' : dlPath,
                   border: OutlineInputBorder(),
                   focusedBorder:
                       OutlineInputBorder(borderSide: BorderSide(color: _color)),
@@ -40,7 +40,7 @@ class DownloadPathPicker extends ConsumerWidget {
                     return;
                   }
                   ref.read(downloadPathProvider.notifier).state = dlPath;
-                  ref.read(configProvider).write({'dlPath': dlPath});
+                  ref.read(configFileProvider).addOrUpdate({'dlPath': dlPath});
                 },
                 icon: Icon(Icons.folder),
               ),

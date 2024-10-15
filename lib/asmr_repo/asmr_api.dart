@@ -5,22 +5,22 @@ import 'package:asmr_downloader/utils/log.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 
-typedef RemoteSourceID = String; // Adjust this based on your actual type
+typedef RemoteSourceID = String; 
 
 class AsmrApi {
   String _baseApiUrl = 'https://api.asmr-200.com/api/';
 
   final Map<String, dynamic> _headers = {
-    "Referer": "https://www.asmr.one/",
-    "Origin": "https://www.asmr.one",
-    "Host": "api.asmr-200.com",
-    "Connection": "keep-alive",
-    "Sec-Fetch-Mode": "cors",
-    "Sec-Fetch-Site": "cross-site",
-    "Sec-Fetch-Dest": "empty",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/78.0.3904.108 Safari/537.36",
+    'Referer': 'https://www.asmr.one/',
+    'Origin': 'https://www.asmr.one',
+    'Host': 'api.asmr-200.com',
+    'Connection': 'keep-alive',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'cross-site',
+    'Sec-Fetch-Dest': 'empty',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+        'AppleWebKit/537.36 (KHTML, like Gecko) '
+        'Chrome/78.0.3904.108 Safari/537.36',
   };
 
   late Dio _dio;
@@ -50,6 +50,14 @@ class AsmrApi {
     _dio = Dio(options);
 
     _setUpProxy(_proxy);
+  }
+
+  void setHost(String host) {
+    _baseApiUrl = 'https://$host/api/';
+    _headers["Host"] = host;
+    _dio.options
+      ..baseUrl = _baseApiUrl
+      ..headers = _headers;
   }
 
   void _setUpProxy(String? proxy) {

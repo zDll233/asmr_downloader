@@ -27,4 +27,10 @@ class JsonStorage {
     final contents = json.encode(data);
     await file.writeAsString(contents);
   }
+
+  Future<void> addOrUpdate(Map<String, dynamic> data) async {
+    final currentData = await read();
+    currentData.addAll(data);
+    await write(currentData);
+  }
 }

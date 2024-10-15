@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/download/dowbload_providers.dart';
+import 'package:asmr_downloader/download/download_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,7 +34,7 @@ class SearchBoxState extends ConsumerState<SearchBox> {
                 controller: _controller,
                 cursorColor: _color,
                 decoration: InputDecoration(
-                  hintText: 'input RJ code',
+                  hintText: '输入RJ号',
                   border: OutlineInputBorder(),
                   focusedBorder:
                       OutlineInputBorder(borderSide: BorderSide(color: _color)),

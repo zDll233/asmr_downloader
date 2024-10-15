@@ -1,5 +1,5 @@
-import 'package:asmr_downloader/common/const.dart';
-import 'package:asmr_downloader/download/dowbload_providers.dart';
+import 'package:asmr_downloader/common/config.dart';
+import 'package:asmr_downloader/download/download_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -45,10 +45,14 @@ class _InitializationState extends ConsumerState<Initialization> {
 }
 
 final _initProvider = FutureProvider.autoDispose((ref) async {
-  // async init
-
   // await ref.read(asmrApiProvider).login();
 
-  final config = await ref.read(configProvider).read();
-  ref.read(downloadPathProvider.notifier).state = config['dlPath'] as String? ?? '';
+  final config = await ref.read(configFileProvider).read();
+  ref.read(downloadPathProvider.notifier).state =
+      config['dlPath'] as String? ?? '';
+  ref.read(dlCoverProvider.notifier).state = config['dlCover'] as bool? ?? true;
+  ref.read(clashProxyProvider.notifier).state =
+      config['clashProxy'] as bool? ?? false;
+  ref.read(apiHostProvider.notifier).state =
+      config['apiHost'] as String? ?? 'asmr-200';
 });

@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/download/dowbload_providers.dart';
+import 'package:asmr_downloader/download/download_providers.dart';
 import 'package:asmr_downloader/download/download_manager.dart';
 import 'package:asmr_downloader/asmr_repo/providers/work_info_providers.dart';
 import 'package:asmr_downloader/model/track_item.dart';
@@ -42,9 +42,9 @@ class WorkInfo extends StatelessWidget {
                                 backgroundColor: Colors.blueGrey),
                             onPressed: downloading
                                 ? null
-                                : DownloadManager(ref: ref).downloadCover,
+                                : DownloadManager(ref: ref).createFolder,
                             child: Text(
-                              downloading ? '下载中' : '创建目录&下载cover',
+                              downloading ? '下载中' : '创建目录&下载封面',
                               style: TextStyle(color: Colors.white70),
                             ));
                       },

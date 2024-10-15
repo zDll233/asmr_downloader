@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/download/dowbload_providers.dart';
+import 'package:asmr_downloader/download/download_providers.dart';
 import 'package:asmr_downloader/download/download_manager.dart';
 import 'package:asmr_downloader/model/track_item.dart';
 import 'package:asmr_downloader/asmr_repo/parse_tracks.dart';

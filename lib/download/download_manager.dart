@@ -1,4 +1,9 @@
-import 'package:asmr_downloader/download/dowbload_providers.dart';
+import 'dart:io';
+
+import 'package:asmr_downloader/common/config.dart';
+// ignore: unused_import
+import 'package:asmr_downloader/common/const.dart';
+import 'package:asmr_downloader/download/download_providers.dart';
 import 'package:asmr_downloader/asmr_repo/providers/work_info_providers.dart';
 import 'package:asmr_downloader/model/track_item.dart';
 import 'package:asmr_downloader/utils/log.dart';
@@ -17,7 +22,7 @@ class DownloadManager {
     // cover + rootFolder
     ref.read(totalTaskCntProvider.notifier).state =
         totalTaskCount(ref.read(rootFolderProvider));
-    await downloadCover();
+    await createFolder();
 
     final rjDirPath = ref.read(rjDirPathProvider);
     await _downloadTrackItem(ref.read(rootFolderProvider), rjDirPath);
@@ -37,16 +42,22 @@ class DownloadManager {
     return totalTaskCnt;
   }
 
-  Future<void> downloadCover() async {
-    final coverUrl = ref.read(coverUrlProvider);
+  Future<void> createFolder() async {
+    final rjDirPath = ref.read(rjDirPathProvider);
+
+    final dlCover = ref.read(dlCoverProvider);
+    if(!dlCover){
+      Directory(rjDirPath).createSync(recursive: true);
+      return;
+    }
 
     // 下载cover
-    final rjDirPath = ref.read(rjDirPathProvider);
     String coverPath = p.join(rjDirPath, 'cover.jpg');
+    final coverUrl = ref.read(coverUrlProvider);
     FileAsset coverFile = FileAsset(
       id: 'cover',
       type: 'image',
-      title: 'cover.jpg',
+      title: '下载封面',
       mediaStreamUrl: coverUrl,
       mediaDownloadUrl: coverUrl,
       size: -1,

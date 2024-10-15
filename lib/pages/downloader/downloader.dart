@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/pages/downloader/config_setting/dl_path_picker.dart';
+import 'package:asmr_downloader/pages/downloader/config_setting/config_settings.dart';
 import 'package:asmr_downloader/pages/downloader/search_box/search_box.dart';
 import 'package:asmr_downloader/pages/downloader/search_result/search_result.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +15,7 @@ class Downloader extends StatelessWidget {
           Row(
             children: [
               SearchBox(),
-              DownloadPathPicker(),
+              ConfigSettings(),
             ],
           ),
           Padding(
