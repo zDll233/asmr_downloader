@@ -24,8 +24,8 @@ class DownloadManager {
         totalTaskCount(ref.read(rootFolderProvider));
     await createFolder();
 
-    final rjDirPath = ref.read(rjDirPathProvider);
-    await _downloadTrackItem(ref.read(rootFolderProvider), rjDirPath);
+    final targetDirPath = ref.read(targetDirPathProvider);
+    await _downloadTrackItem(ref.read(rootFolderProvider), targetDirPath);
     ref.read(currentDlProvider.notifier).state = 0;
     ref.read(totalTaskCntProvider.notifier).state = 0;
   }
@@ -43,10 +43,11 @@ class DownloadManager {
   }
 
   Future<void> createFolder() async {
-    final rjDirPath = ref.read(rjDirPathProvider);
+    final rjDirPath =
+        p.join(ref.read(targetDirPathProvider), ref.read(rjProvider));
 
     final dlCover = ref.read(dlCoverProvider);
-    if(!dlCover){
+    if (!dlCover) {
       Directory(rjDirPath).createSync(recursive: true);
       return;
     }
