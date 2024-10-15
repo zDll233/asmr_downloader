@@ -1,5 +1,7 @@
+import 'package:asmr_downloader/download/dowbload_providers.dart';
 import 'package:asmr_downloader/download/download_manager.dart';
 import 'package:asmr_downloader/asmr_repo/providers/work_info_providers.dart';
+import 'package:asmr_downloader/model/track_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -31,15 +33,22 @@ class WorkInfo extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10.0),
-                    child: TextButton(
-                        style: TextButton.styleFrom(
-                            backgroundColor: Colors.blueGrey),
-                        onPressed: () =>
-                            DownloadManager(ref: ref).downloadCover(),
-                        child: Text(
-                          '创建目录&下载cover',
-                          style: TextStyle(color: Colors.white70),
-                        )),
+                    child: Consumer(
+                      builder: (_, WidgetRef ref, __) {
+                        final downloading = ref.watch(dlStatusProvider) ==
+                            DownloadStatus.downloading;
+                        return TextButton(
+                            style: TextButton.styleFrom(
+                                backgroundColor: Colors.blueGrey),
+                            onPressed: downloading
+                                ? null
+                                : DownloadManager(ref: ref).downloadCover,
+                            child: Text(
+                              downloading ? '下载中' : '创建目录&下载cover',
+                              style: TextStyle(color: Colors.white70),
+                            ));
+                      },
+                    ),
                   ),
                   FadeInImage(
                       placeholder: MemoryImage(kTransparentImage),

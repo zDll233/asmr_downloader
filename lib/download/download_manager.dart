@@ -9,24 +9,51 @@ import 'package:path/path.dart' as p;
 
 class DownloadManager {
   final WidgetRef ref;
-  final String targetDirPath;
+  final String rjDirPath;
   DownloadManager({required this.ref})
-      : targetDirPath = ref.read(downloadPathProvider);
+      : rjDirPath = ref.read(rjDirPathProvider);
 
   final Dio _dio = Dio();
 
   Future<void> run() async {
+    // cover + rootFolder
+    ref.read(totalTaskCntProvider.notifier).state =
+        totalTaskCount(ref.read(rootFolderProvider)) + 1;
     await downloadCover();
-    await _downloadTrackItem(ref.read(rootFolderProvider), targetDirPath);
+
+    await _downloadTrackItem(ref.read(rootFolderProvider), rjDirPath);
+    ref.read(currentDlProvider.notifier).state = 0;
+    ref.read(totalTaskCntProvider.notifier).state = 0;
+  }
+
+  int totalTaskCount(Folder rootFolder) {
+    int totalTaskCnt = 0;
+    for (final child in rootFolder.children) {
+      if (child is Folder) {
+        totalTaskCnt += totalTaskCount(child);
+      } else if (child.selected) {
+        totalTaskCnt++;
+      }
+    }
+    return totalTaskCnt;
   }
 
   Future<void> downloadCover() async {
     final coverUrl = ref.read(coverUrlProvider);
 
     // 下载cover
-    String coverPath = p.join(targetDirPath, 'cover.jpg');
+    String coverPath = p.join(rjDirPath, 'cover.jpg');
+    FileAsset coverFile = FileAsset(
+      id: 'cover',
+      type: 'image',
+      title: 'cover.jpg',
+      mediaStreamUrl: coverUrl,
+      mediaDownloadUrl: coverUrl,
+      size: -1,
+    )..savePath = coverPath;
+
     try {
-      await _dioDownload(coverUrl, coverPath);
+      await _downloadTask(coverFile);
     } catch (e) {
       Log.error('Download cover failed: $e');
     }
@@ -34,14 +61,13 @@ class DownloadManager {
 
   Future<void> _downloadTrackItem(
       TrackItem trackItem, String targetDirPath) async {
+    final legalTitle = trackItem.title.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
+    final targetPath = p.join(targetDirPath, legalTitle);
     if (trackItem is Folder) {
-      final dirPath = p.join(targetDirPath, trackItem.title);
       for (final child in trackItem.children) {
-        _downloadTrackItem(child, dirPath);
+        await _downloadTrackItem(child, targetPath);
       }
     } else if (trackItem is FileAsset) {
-      final targetPath = p.join(targetDirPath,
-          trackItem.title.replaceAll(RegExp(r'[<>:"/\\|?*]'), ''));
       if (trackItem.selected) {
         try {
           trackItem.savePath = targetPath;
@@ -56,20 +82,25 @@ class DownloadManager {
   // 开始下载任务
   Future<void> _downloadTask(FileAsset task) async {
     task.status = DownloadStatus.downloading;
+    ref.read(dlStatusProvider.notifier).state = DownloadStatus.downloading;
     try {
+      ref.read(currentFileNameProvider.notifier).state = task.title;
+      ref.read(processProvider.notifier).state = 0;
+      ref.read(currentDlProvider.notifier).state++;
       await _dioDownload(
         task.mediaDownloadUrl,
         task.savePath,
         cancelToken: task.cancelToken,
         onReceiveProgress: (received, total) {
-          if (total <= 0) {
+          if (total > 0) {
             task.progress = received / total;
-            // 通知UI更新（例如使用状态管理）
+            ref.read(processProvider.notifier).state = task.progress;
           }
         },
       );
 
       task.status = DownloadStatus.completed;
+      ref.read(dlStatusProvider.notifier).state = DownloadStatus.completed;
       task.progress = 1.0;
     } on DioException catch (e) {
       if (CancelToken.isCancel(e)) {

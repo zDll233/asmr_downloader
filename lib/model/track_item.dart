@@ -1,12 +1,15 @@
 import 'package:dio/dio.dart';
 
 class TrackItem {
+  String id;
   String type;
   String title;
   List<String> pathLs = [];
   bool selected = false;
+  int depth = 0;
 
   TrackItem({
+    required this.id,
     required this.type,
     required this.title,
   });
@@ -15,6 +18,7 @@ class TrackItem {
 class Folder extends TrackItem {
   List<TrackItem> children = [];
   Folder({
+    required super.id,
     super.type = 'folder',
     required super.title,
   });
@@ -29,12 +33,26 @@ class Folder extends TrackItem {
       }
     }
   }
+
+  TrackItem? search(String id) {
+    for (final child in children) {
+      if (child.id == id) {
+        return child;
+      }
+      if (child is Folder) {
+        final result = child.search(id);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+    return null;
+  }
 }
 
 enum DownloadStatus { notStarted, downloading, completed, failed, canceled }
 
 class FileAsset extends TrackItem {
-  String hash;
   String mediaStreamUrl;
   String mediaDownloadUrl;
   int size;
@@ -45,12 +63,12 @@ class FileAsset extends TrackItem {
   CancelToken cancelToken;
 
   FileAsset({
+    required super.id,
     required super.type,
     required super.title,
     required this.mediaStreamUrl,
     required this.mediaDownloadUrl,
     required this.size,
-    required this.hash,
     this.savePath = '',
     this.status = DownloadStatus.notStarted,
     this.progress = 0.0,

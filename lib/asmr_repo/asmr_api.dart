@@ -27,13 +27,19 @@ class AsmrApi {
 
   final String name;
   final String password;
-  final String? proxy;
+  String? _proxy;
+
+  String? get proxy => _proxy;
+  set proxy(String? proxy) {
+    _proxy = proxy;
+    _setUpProxy(proxy);
+  }
 
   AsmrApi({
     required this.name,
     required this.password,
-    this.proxy,
-  }) {
+    String? proxy,
+  }) : _proxy = proxy {
     BaseOptions options = BaseOptions(
       baseUrl: _baseApiUrl,
       headers: _headers,
@@ -43,16 +49,18 @@ class AsmrApi {
 
     _dio = Dio(options);
 
-    // Set up proxy if provided
-    if (proxy != null) {
-      _dio.httpClientAdapter = IOHttpClientAdapter(
-        createHttpClient: () {
-          final client = HttpClient();
-          client.findProxy = (uri) => "PROXY $proxy";
-          return client;
-        },
-      );
-    }
+    _setUpProxy(_proxy);
+  }
+
+  void _setUpProxy(String? proxy) {
+    String p = proxy ?? 'DIRECT';
+    _dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.findProxy = (uri) => "PROXY $p";
+        return client;
+      },
+    );
   }
 
   /// Sets the API channel by updating the base URL and host header.

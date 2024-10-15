@@ -2,31 +2,39 @@ import 'package:asmr_downloader/model/track_item.dart';
 import 'package:collection/collection.dart';
 
 List<TrackItem> getTrackItems(List<dynamic> tracks,
-    {List<String> basePathLs = const []}) {
+    {int depth = 0, List<String> basePathLs = const []}) {
   List<TrackItem> trackItems = [];
   for (final track in tracks) {
     final title = track['title'];
     final type = track['type'];
     final newPathLs = basePathLs + [title];
     if (type == 'folder') {
-      Folder folder = Folder(title: title);
-      folder.pathLs = newPathLs;
-
-      folder.children = getTrackItems(
+      Folder folder = Folder(id: title, title: title);
+      final children = getTrackItems(
         track['children'],
+        depth: depth + 1,
         basePathLs: folder.pathLs,
       );
+      // trackItems.addAll(children);
+
+      folder
+        ..pathLs = newPathLs
+        ..depth = depth + 1
+        ..children = children;
+
       trackItems.add(folder);
     } else {
       FileAsset fileAsset = FileAsset(
-        hash: track['hash'],
+        id: track['hash'],
         type: type,
         title: title,
         mediaStreamUrl: track['mediaStreamUrl'],
         mediaDownloadUrl: track['mediaDownloadUrl'],
         size: track['size'],
       );
-      fileAsset.pathLs = newPathLs;
+      fileAsset
+        ..pathLs = newPathLs
+        ..depth = depth + 1;
       trackItems.add(fileAsset);
     }
   }
