@@ -17,7 +17,7 @@ class WindowTitleBar extends StatelessWidget {
       decoration: BoxDecoration(color: Colors.transparent),
       child: SizedBox(
         width: double.infinity,
-        height: titleBarHeight,
+        height: TITLEBAR_HEIGHT,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

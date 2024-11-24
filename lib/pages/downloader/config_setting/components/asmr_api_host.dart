@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/asmr_repo/providers/api_providers.dart';
+import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
 import 'package:asmr_downloader/common/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/model/track_item.dart';
+import 'package:asmr_downloader/models/track_item.dart';
 import 'package:collection/collection.dart';
 
 List<TrackItem> getTrackItems(List<dynamic> tracks,

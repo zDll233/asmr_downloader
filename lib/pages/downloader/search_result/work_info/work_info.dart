@@ -1,7 +1,7 @@
-import 'package:asmr_downloader/download/download_providers.dart';
-import 'package:asmr_downloader/download/download_manager.dart';
-import 'package:asmr_downloader/asmr_repo/providers/work_info_providers.dart';
-import 'package:asmr_downloader/model/track_item.dart';
+import 'package:asmr_downloader/services/download/download_providers.dart';
+import 'package:asmr_downloader/services/download/download_manager.dart';
+import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
+import 'package:asmr_downloader/models/track_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:transparent_image/transparent_image.dart';

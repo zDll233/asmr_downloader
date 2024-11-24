@@ -54,7 +54,7 @@ class AsmrApi {
 
   void setHost(String host) {
     _baseApiUrl = 'https://$host/api/';
-    _headers["Host"] = host;
+    _headers['Host'] = host;
     _dio.options
       ..baseUrl = _baseApiUrl
       ..headers = _headers;
@@ -65,7 +65,7 @@ class AsmrApi {
     _dio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
-        client.findProxy = (uri) => "PROXY $p";
+        client.findProxy = (uri) => 'PROXY $p';
         return client;
       },
     );
@@ -74,7 +74,7 @@ class AsmrApi {
   /// Sets the API channel by updating the base URL and host header.
   void setApiChannel(String apiChannel) {
     _baseApiUrl = 'https://$apiChannel/api/';
-    _headers["Host"] = apiChannel;
+    _headers['Host'] = apiChannel;
     _dio.options.baseUrl = _baseApiUrl;
   }
 
@@ -83,12 +83,12 @@ class AsmrApi {
     try {
       final response = await _dio.post(
         'auth/me',
-        data: {"name": name, "password": password},
+        data: {'name': name, 'password': password},
       );
 
       if (response.statusCode == 200) {
         final token = response.data['token'];
-        _headers["Authorization"] = "Bearer $token";
+        _headers['Authorization'] = 'Bearer $token';
         _dio.options.headers = _headers;
 
         Log.info('Login successfully');
@@ -163,9 +163,9 @@ class AsmrApi {
     String filterBy = 'all',
   }) async {
     return await get('playlist/get-playlists', params: {
-      "page": page,
-      "pageSize": pageSize,
-      "filterBy": filterBy,
+      'page': page,
+      'pageSize': pageSize,
+      'filterBy': filterBy,
     });
   }
 
@@ -176,11 +176,11 @@ class AsmrApi {
     int privacy = 0,
   }) async {
     return await post('playlist/create-playlist', data: {
-      "name": name,
-      "description": description ?? "",
-      "privacy": privacy,
-      "locale": "zh-CN",
-      "works": [],
+      'name': name,
+      'description': description ?? '',
+      'privacy': privacy,
+      'locale': 'zh-CN',
+      'works': [],
     });
   }
 
@@ -190,8 +190,8 @@ class AsmrApi {
     required String plId,
   }) async {
     return await post('playlist/add-works-to-playlist', data: {
-      "id": plId,
-      "works": sourceIds,
+      'id': plId,
+      'works': sourceIds,
     });
   }
 
@@ -200,7 +200,7 @@ class AsmrApi {
     required String plId,
   }) async {
     return await post('playlist/delete-playlist', data: {
-      "id": plId,
+      'id': plId,
     });
   }
 
@@ -225,7 +225,7 @@ class AsmrApi {
     required Map<String, dynamic> params,
   }) async {
     return await getSearchResult(
-      content: "\$tag:$tagName\$",
+      content: '\$tag:$tagName\$',
       params: params,
     );
   }
@@ -236,7 +236,7 @@ class AsmrApi {
     required Map<String, dynamic> params,
   }) async {
     return await getSearchResult(
-      content: "\$va:$vaName\$",
+      content: '\$va:$vaName\$',
       params: params,
     );
   }

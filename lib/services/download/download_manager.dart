@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:asmr_downloader/common/config.dart';
 // ignore: unused_import
 import 'package:asmr_downloader/common/const.dart';
-import 'package:asmr_downloader/download/download_providers.dart';
-import 'package:asmr_downloader/asmr_repo/providers/work_info_providers.dart';
-import 'package:asmr_downloader/model/track_item.dart';
+import 'package:asmr_downloader/services/download/download_providers.dart';
+import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
+import 'package:asmr_downloader/models/track_item.dart';
 import 'package:asmr_downloader/utils/log.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -135,21 +135,39 @@ class DownloadManager {
   }) async {
     Response? response;
     int tryCount = 0;
+    File file = File(savePath);
+
+    // 获取本地已经下载的文件大小
+    int downloadedBytes = 0;
+
     while (tryCount < maxTry && response == null) {
       try {
         tryCount++;
         Log.i('Current try:$tryCount\nDownloading $urlPath');
+
+        if (file.existsSync()) {
+          downloadedBytes = file.lengthSync();
+        }
+
+        // 如果已经下载部分内容，添加Range头
         response = await _dio.download(
           urlPath,
           savePath,
           cancelToken: cancelToken,
           onReceiveProgress: onReceiveProgress,
+          options: Options(
+            headers: downloadedBytes > 0
+                ? {'Range': 'bytes=$downloadedBytes-'}
+                : null,
+          ),
         );
+
         Log.i('Downloaded $urlPath into $savePath');
       } catch (e) {
-        Log.warning('Currrent try:$tryCount\nDownload failed: $e');
+        Log.warning('Current try:$tryCount\nDownload failed: $e');
       }
     }
+
     if (response == null) {
       Log.error('Download failed after $maxTry tries');
       return Future.error('Download failed after $maxTry tries');
@@ -161,9 +179,7 @@ class DownloadManager {
   // 取消下载任务
   void cancelDownload(FileAsset task) {
     if (!task.cancelToken.isCancelled) {
-      task.cancelToken.cancel("下载已取消");
+      task.cancelToken.cancel('下载已取消');
     }
   }
-
-  // 暂停和恢复功能可以通过更复杂的逻辑实现，比如支持断点续传
 }

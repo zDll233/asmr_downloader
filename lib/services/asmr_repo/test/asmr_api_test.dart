@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/asmr_repo/asmr_api.dart';
+import 'package:asmr_downloader/services/asmr_repo/asmr_api.dart';
 import 'package:asmr_downloader/utils/log.dart';
 import 'package:flutter/foundation.dart';
 // ignore: depend_on_referenced_packages
