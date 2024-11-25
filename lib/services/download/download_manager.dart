@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:asmr_downloader/common/config.dart';
-// ignore: unused_import
-import 'package:asmr_downloader/common/const.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
 import 'package:asmr_downloader/models/track_item.dart';
@@ -43,8 +41,8 @@ class DownloadManager {
   }
 
   Future<void> createFolder() async {
-    final rjDirPath =
-        p.join(ref.read(targetDirPathProvider), ref.read(rjProvider));
+    final rj = ref.read(rjProvider);
+    final rjDirPath = p.join(ref.read(targetDirPathProvider), rj);
 
     final dlCover = ref.read(dlCoverProvider);
     if (!dlCover) {
@@ -53,7 +51,7 @@ class DownloadManager {
     }
 
     // 下载cover
-    String coverPath = p.join(rjDirPath, 'cover.jpg');
+    String coverPath = p.join(rjDirPath, '${rj}_cover.jpg');
     final coverUrl = ref.read(coverUrlProvider);
     FileAsset coverFile = FileAsset(
       id: 'cover',
@@ -100,9 +98,10 @@ class DownloadManager {
       ref.read(currentFileNameProvider.notifier).state = task.title;
       ref.read(processProvider.notifier).state = 0;
       // ref.read(currentDlProvider.notifier).state++;
-      await _dioDownload(
+      await _resumableDownload(
         task.mediaDownloadUrl,
         task.savePath,
+        task.size,
         cancelToken: task.cancelToken,
         onReceiveProgress: (received, total) {
           if (total > 0) {
@@ -126,53 +125,80 @@ class DownloadManager {
     }
   }
 
-  Future<Response<dynamic>> _dioDownload(
+  Future<void> mergeFile(File file, File tmpFile) async {
+    if (await tmpFile.exists()) {
+      await file.writeAsBytes(
+        await tmpFile.readAsBytes(),
+        mode: FileMode.append,
+      );
+      await tmpFile.delete();
+    }
+  }
+
+  Future<bool> _resumableDownload(
     String urlPath,
-    dynamic savePath, {
-    int maxTry = 3,
+    String savePath,
+    int fileSize, {
     CancelToken? cancelToken,
     void Function(int, int)? onReceiveProgress,
   }) async {
+    // ignore: unused_local_variable
     Response? response;
-    int tryCount = 0;
-    File file = File(savePath);
+    final file = File(savePath);
 
-    // 获取本地已经下载的文件大小
+    final tmpSavePath = '$savePath.tmp';
+    final tmpFile = File(tmpSavePath);
+
+    // 本地已经下载的文件大小
     int downloadedBytes = 0;
+    int tmpFileLen = 0;
 
-    while (tryCount < maxTry && response == null) {
+    while (true) {
       try {
-        tryCount++;
-        Log.i('Current try:$tryCount\nDownloading $urlPath');
-
-        if (file.existsSync()) {
-          downloadedBytes = file.lengthSync();
+        if (await file.exists()) {
+          downloadedBytes = await file.length();
         }
 
-        // 如果已经下载部分内容，添加Range头
-        response = await _dio.download(
-          urlPath,
-          savePath,
-          cancelToken: cancelToken,
-          onReceiveProgress: onReceiveProgress,
-          options: Options(
-            headers: downloadedBytes > 0
-                ? {'Range': 'bytes=$downloadedBytes-'}
-                : null,
-          ),
-        );
+        if (await tmpFile.exists()) {
+          tmpFileLen = await tmpFile.length();
+          if (tmpFileLen > 0 && tmpFileLen + downloadedBytes <= fileSize) {
+            downloadedBytes += tmpFileLen;
+            await mergeFile(file, tmpFile);
+          } else {
+            await tmpFile.delete();
+          }
+        }
 
-        Log.i('Downloaded $urlPath into $savePath');
+        if (downloadedBytes == 0) {
+          response = await _dio.download(
+            urlPath,
+            savePath,
+            cancelToken: cancelToken,
+            deleteOnError: false,
+            onReceiveProgress: onReceiveProgress,
+          );
+        } else if (downloadedBytes < fileSize) {
+          response = await _dio.download(
+            urlPath,
+            tmpSavePath,
+            cancelToken: cancelToken,
+            deleteOnError: false,
+            onReceiveProgress: onReceiveProgress,
+            options:
+                Options(headers: {'range': 'bytes=$downloadedBytes-$fileSize'}),
+          );
+        } else if (downloadedBytes == fileSize) {
+          Log.info('Download completed: $savePath');
+          return true;
+        } else {
+          Log.error('Download failed: downloadedBytes > fileSize');
+          return false;
+        }
       } catch (e) {
-        Log.warning('Current try:$tryCount\nDownload failed: $e');
+        Log.error('Download failed: $e');
+      } finally {
+        await mergeFile(file, tmpFile);
       }
-    }
-
-    if (response == null) {
-      Log.error('Download failed after $maxTry tries');
-      return Future.error('Download failed after $maxTry tries');
-    } else {
-      return response;
     }
   }
 

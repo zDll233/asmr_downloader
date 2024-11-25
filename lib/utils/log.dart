@@ -7,7 +7,6 @@ class Log {
   static final Log _instance = Log._internal();
 
   late final Logger _logger;
-  final Logger _simpleLogger = Logger(printer: PrettyPrinter(methodCount: 0));
 
   // named constructor
   Log._internal() {
@@ -19,7 +18,7 @@ class Log {
     _logger = kDebugMode
         ? Logger(
             printer: PrettyPrinter(
-              methodCount: 2,
+              methodCount: 5,
               dateTimeFormat: DateTimeFormat.dateAndTime,
             ),
           )
@@ -43,32 +42,16 @@ class Log {
     _instance._logger.t(message);
   }
 
-  static void t(String message) {
-    _instance._simpleLogger.t(message);
-  }
-
   static void debug(String message) {
     _instance._logger.d(message);
-  }
-
-  static void d(String message) {
-    _instance._simpleLogger.d(message);
   }
 
   static void info(String message) {
     _instance._logger.i(message);
   }
 
-  static void i(String message) {
-    _instance._simpleLogger.i(message);
-  }
-
   static void warning(String message) {
     _instance._logger.w(message);
-  }
-
-  static void w(String message) {
-    _instance._simpleLogger.w(message);
   }
 
   static void error(
@@ -85,15 +68,7 @@ class Log {
     );
   }
 
-  static void e(String message) {
-    _instance._simpleLogger.e(message);
-  }
-
   static void fatal(String message) {
     _instance._logger.f(message);
-  }
-
-  static void f(String message) {
-    _instance._simpleLogger.f(message);
   }
 }
