@@ -19,7 +19,7 @@ class DownloadPathPicker extends ConsumerWidget {
         child: Row(
           children: [
             SizedBox(
-              width: 200,
+              width: 250,
               child: TextField(
                 enabled: false,
                 cursorColor: _color,

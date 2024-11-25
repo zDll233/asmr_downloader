@@ -29,7 +29,7 @@ class SearchBoxState extends ConsumerState<SearchBox> {
         child: Row(
           children: [
             SizedBox(
-              width: 200,
+              width: 150,
               child: TextField(
                 controller: _controller,
                 cursorColor: _color,
@@ -52,8 +52,6 @@ class SearchBoxState extends ConsumerState<SearchBox> {
                 onPressed: () {
                   final rj = _inputText.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
                   ref.read(rjProvider.notifier).state = rj;
-                  // String str = r'陽向葵ゅか-【 "一緒に眠る" ASMR】不眠症の眠り姫～あなたと眠る異世界生活～';
-                  // print(str.replaceAll(RegExp(r'[<>:"/\\|?*]'), ''));
                 },
                 icon: Icon(Icons.search),
               ),

@@ -14,7 +14,13 @@ class DownloadManager {
   final WidgetRef ref;
   DownloadManager({required this.ref});
 
-  final Dio _dio = Dio();
+  final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: Duration(seconds: 10),
+      receiveTimeout: Duration(seconds: 20),
+      sendTimeout: Duration(seconds: 15),
+    ),
+  );
 
   Future<void> run() async {
     // cover + rootFolder
@@ -191,8 +197,11 @@ class DownloadManager {
           Log.info('Download completed: $savePath');
           return true;
         } else {
-          Log.error('Download failed: downloadedBytes > fileSize');
-          return false;
+          // cover 自定义的filesize=-1
+          if (fileSize != -1) {
+            Log.error('Download failed: downloadedBytes > fileSize');
+            return false;
+          }
         }
       } catch (e) {
         Log.error('Download failed: $e');

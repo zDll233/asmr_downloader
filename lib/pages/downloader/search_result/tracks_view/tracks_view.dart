@@ -72,11 +72,14 @@ class TracksView extends ConsumerWidget {
                                 value: process,
                               ),
                               Positioned(
-                                  top: 3,
+                                  top: 3.5,
                                   left: 5,
-                                  child: Text(
-                                    currentFileName,
-                                    overflow: TextOverflow.ellipsis,
+                                  child: SizedBox(
+                                    width: appWidth * 0.34,
+                                    child: Text(
+                                      currentFileName,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   )),
                             ]),
                           );
@@ -88,7 +91,7 @@ class TracksView extends ConsumerWidget {
                           return SizedBox(
                             width: appWidth * 0.07,
                             child: Center(
-                                child: Text(
+                              child: Text(
                                     '${(process * 100).toStringAsFixed(2)}%')),
                           );
                         },
