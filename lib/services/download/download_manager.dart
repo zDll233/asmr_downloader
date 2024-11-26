@@ -17,21 +17,19 @@ class DownloadManager {
   final Dio _dio = Dio(
     BaseOptions(
       connectTimeout: Duration(seconds: 10),
-      receiveTimeout: Duration(seconds: 20),
+      receiveTimeout: Duration(seconds: 15),
       sendTimeout: Duration(seconds: 15),
     ),
   );
 
   Future<void> run() async {
-    // cover + rootFolder
+    ref.read(currentDlProvider.notifier).state = 0;
     ref.read(totalTaskCntProvider.notifier).state =
         totalTaskCount(ref.read(rootFolderProvider));
     await createFolder();
 
     final targetDirPath = ref.read(targetDirPathProvider);
     await _downloadTrackItem(ref.read(rootFolderProvider), targetDirPath);
-    ref.read(currentDlProvider.notifier).state = 0;
-    ref.read(totalTaskCntProvider.notifier).state = 0;
   }
 
   int totalTaskCount(Folder rootFolder) {
@@ -57,16 +55,16 @@ class DownloadManager {
     }
 
     // 下载cover
-    String coverPath = p.join(rjDirPath, '${rj}_cover.jpg');
     final coverUrl = ref.read(coverUrlProvider);
     FileAsset coverFile = FileAsset(
-      id: 'cover',
+      id: '${rj}_cover',
       type: 'image',
       title: '下载封面',
       mediaStreamUrl: coverUrl,
       mediaDownloadUrl: coverUrl,
       size: -1,
-    )..savePath = coverPath;
+      savePath: p.join(rjDirPath, '${rj}_cover.jpg'),
+    );
 
     try {
       await _downloadTask(coverFile);
@@ -87,7 +85,6 @@ class DownloadManager {
       if (trackItem.selected) {
         try {
           trackItem.savePath = targetPath;
-          ref.read(currentDlProvider.notifier).state++;
           await _downloadTask(trackItem);
         } catch (e) {
           Log.error('Download ${trackItem.title} failed: $e');
@@ -103,8 +100,8 @@ class DownloadManager {
     try {
       ref.read(currentFileNameProvider.notifier).state = task.title;
       ref.read(processProvider.notifier).state = 0;
-      // ref.read(currentDlProvider.notifier).state++;
-      await _resumableDownload(
+      ref.read(currentDlProvider.notifier).state++;
+      final dlFlag = await _resumableDownload(
         task.mediaDownloadUrl,
         task.savePath,
         task.size,
@@ -117,9 +114,13 @@ class DownloadManager {
         },
       );
 
-      task.status = DownloadStatus.completed;
-      ref.read(dlStatusProvider.notifier).state = DownloadStatus.completed;
-      task.progress = 1.0;
+      if (dlFlag) {
+        // 如果文件已存在，不会调用onReceiveProgress，需要手动设置进度
+        task.status = DownloadStatus.completed;
+        ref.read(dlStatusProvider.notifier).state = DownloadStatus.completed;
+        task.progress = 1.0;
+        ref.read(processProvider.notifier).state = 1.0;
+      }
     } on DioException catch (e) {
       if (CancelToken.isCancel(e)) {
         task.status = DownloadStatus.canceled;
@@ -189,7 +190,9 @@ class DownloadManager {
             tmpSavePath,
             cancelToken: cancelToken,
             deleteOnError: false,
-            onReceiveProgress: onReceiveProgress,
+            onReceiveProgress: (received, total) {
+              onReceiveProgress!(received + downloadedBytes, fileSize);
+            },
             options:
                 Options(headers: {'range': 'bytes=$downloadedBytes-$fileSize'}),
           );
@@ -197,7 +200,7 @@ class DownloadManager {
           Log.info('Download completed: $savePath');
           return true;
         } else {
-          // cover 自定义的filesize=-1
+          // cover自定义的filesize=-1
           if (fileSize != -1) {
             Log.error('Download failed: downloadedBytes > fileSize');
             return false;
