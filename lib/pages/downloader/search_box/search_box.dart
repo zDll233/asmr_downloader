@@ -1,3 +1,4 @@
+import 'package:asmr_downloader/models/track_item.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,12 +49,21 @@ class SearchBoxState extends ConsumerState<SearchBox> {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 5.0),
-              child: IconButton(
-                onPressed: () {
-                  final rj = _inputText.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
-                  ref.read(rjProvider.notifier).state = rj;
+              child: Consumer(
+                builder: (_, WidgetRef ref, __) {
+                  final dlStatus = ref.watch(dlStatusProvider);
+                  return IconButton(
+                    onPressed: dlStatus == DownloadStatus.downloading
+                        ? null
+                        : () {
+                            final rj = _inputText.replaceAll(
+                                RegExp(r'[^a-zA-Z0-9]'), '');
+                            ref.read(rjProvider.notifier).state = rj;
+                          },
+                    // null,
+                    icon: Icon(Icons.search),
+                  );
                 },
-                icon: Icon(Icons.search),
               ),
             ),
           ],

@@ -28,6 +28,8 @@ class DownloadManager {
       return;
     }
 
+    ref.read(dlStatusProvider.notifier).state = DownloadStatus.downloading;
+
     ref.read(currentDlProvider.notifier).state = 0;
     ref.read(totalTaskCntProvider.notifier).state =
         totalTaskCount(rootFolderSnapshot);
@@ -35,6 +37,8 @@ class DownloadManager {
 
     final targetDirPath = ref.read(targetDirPathProvider);
     await _downloadTrackItem(rootFolderSnapshot, targetDirPath);
+
+    ref.read(dlStatusProvider.notifier).state = DownloadStatus.completed;
   }
 
   int totalTaskCount(Folder rootFolder) {
@@ -101,7 +105,6 @@ class DownloadManager {
   // 开始下载任务
   Future<void> _downloadTask(FileAsset task) async {
     task.status = DownloadStatus.downloading;
-    ref.read(dlStatusProvider.notifier).state = DownloadStatus.downloading;
     try {
       ref.read(currentFileNameProvider.notifier).state = task.title;
       ref.read(processProvider.notifier).state = 0;
@@ -122,7 +125,6 @@ class DownloadManager {
       if (dlFlag) {
         // 如果文件已存在，不会调用onReceiveProgress，需要手动设置进度
         task.status = DownloadStatus.completed;
-        ref.read(dlStatusProvider.notifier).state = DownloadStatus.completed;
         task.progress = 1.0;
         ref.read(processProvider.notifier).state = 1.0;
       }
