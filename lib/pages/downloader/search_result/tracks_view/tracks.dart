@@ -28,7 +28,7 @@ class TracksState extends ConsumerState<Tracks> {
         Padding(
           padding: EdgeInsets.only(left: _lPadding),
           child: ExpansionTile(
-            leading: Icon(Icons.folder),
+            leading: Icon(Icons.folder, color: Color(0xFFF9C100)),
             trailing: Checkbox(
                 value: track.selected,
                 onChanged: (bool? newValue) {
@@ -61,7 +61,7 @@ class TracksState extends ConsumerState<Tracks> {
             },
             title: Row(
               children: [
-                Icon(getIconForType(track.type)),
+                getIconFromType(track.type),
                 SizedBox(width: 10.0),
                 Flexible(
                   child: Text(
@@ -78,18 +78,16 @@ class TracksState extends ConsumerState<Tracks> {
     return trackWidgets;
   }
 
-  IconData getIconForType(String type) {
+  Icon getIconFromType(String type) {
     switch (type) {
-      case 'folder':
-        return Icons.folder;
       case 'audio':
-        return Icons.music_note;
+        return Icon(Icons.music_note, color: Colors.blue);
       case 'image':
-        return Icons.image;
+        return Icon(Icons.image, color: Colors.green);
       case 'text':
-        return Icons.text_fields;
+        return Icon(Icons.text_snippet, color: Colors.grey);
       default:
-        return Icons.error;
+        return Icon(Icons.error, color: Colors.red);
     }
   }
 }
