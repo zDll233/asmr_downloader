@@ -13,15 +13,55 @@ class TrackItem {
     required this.type,
     required this.title,
   });
+
+  TrackItem copyWith({
+    String? id,
+    String? type,
+    String? title,
+    List<String>? pathLs,
+    bool? selected,
+    int? depth,
+  }) {
+    return TrackItem(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      title: title ?? this.title,
+    )
+      ..pathLs = pathLs ?? List<String>.of(this.pathLs)
+      ..selected = selected ?? this.selected
+      ..depth = depth ?? this.depth;
+  }
 }
 
 class Folder extends TrackItem {
   List<TrackItem> children = [];
+
   Folder({
     required super.id,
     super.type = 'folder',
     required super.title,
   });
+
+  @override
+  Folder copyWith({
+    String? id,
+    String? type,
+    String? title,
+    List<String>? pathLs,
+    bool? selected,
+    int? depth,
+    List<TrackItem>? children,
+  }) {
+    return Folder(
+      id: id ?? this.id,
+      title: title ?? this.title,
+    )
+      ..pathLs = pathLs ?? List<String>.of(this.pathLs)
+      ..selected = selected ?? this.selected
+      ..depth = depth ?? this.depth
+      ..children =
+          children ?? this.children.map((child) => child.copyWith()).toList();
+  }
 
   void setSelection(bool value) {
     selected = value;
@@ -74,4 +114,37 @@ class FileAsset extends TrackItem {
     this.progress = 0.0,
     CancelToken? cancelToken,
   }) : cancelToken = cancelToken ?? CancelToken();
+
+  @override
+  FileAsset copyWith({
+    String? id,
+    String? type,
+    String? title,
+    List<String>? pathLs,
+    bool? selected,
+    int? depth,
+    String? mediaStreamUrl,
+    String? mediaDownloadUrl,
+    int? size,
+    String? savePath,
+    DownloadStatus? status,
+    double? progress,
+    CancelToken? cancelToken,
+  }) {
+    return FileAsset(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      title: title ?? this.title,
+      mediaStreamUrl: mediaStreamUrl ?? this.mediaStreamUrl,
+      mediaDownloadUrl: mediaDownloadUrl ?? this.mediaDownloadUrl,
+      size: size ?? this.size,
+      savePath: savePath ?? this.savePath,
+      status: status ?? this.status,
+      progress: progress ?? this.progress,
+      cancelToken: cancelToken ?? CancelToken(),
+    )
+      ..pathLs = pathLs ?? List<String>.of(this.pathLs)
+      ..selected = selected ?? this.selected
+      ..depth = depth ?? this.depth;
+  }
 }
