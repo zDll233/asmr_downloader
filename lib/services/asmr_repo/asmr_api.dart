@@ -5,7 +5,7 @@ import 'package:asmr_downloader/utils/log.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 
-typedef RemoteSourceID = String; 
+typedef RemoteSourceID = String;
 
 class AsmrApi {
   String _baseApiUrl = 'https://api.asmr-200.com/api/';
@@ -43,8 +43,9 @@ class AsmrApi {
     BaseOptions options = BaseOptions(
       baseUrl: _baseApiUrl,
       headers: _headers,
-      connectTimeout: Duration(milliseconds: 5000),
-      receiveTimeout: Duration(milliseconds: 3000),
+      connectTimeout: Duration(seconds: 10),
+      receiveTimeout: Duration(seconds: 15),
+      sendTimeout: Duration(seconds: 15),
     );
 
     _dio = Dio(options);

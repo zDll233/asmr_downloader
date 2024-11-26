@@ -25,11 +25,11 @@ class DownloadManager {
   Future<void> run() async {
     ref.read(currentDlProvider.notifier).state = 0;
     ref.read(totalTaskCntProvider.notifier).state =
-        totalTaskCount(ref.read(rootFolderProvider));
+        totalTaskCount(ref.read(rootFolderProvider)!);
     await createFolder();
 
     final targetDirPath = ref.read(targetDirPathProvider);
-    await _downloadTrackItem(ref.read(rootFolderProvider), targetDirPath);
+    await _downloadTrackItem(ref.read(rootFolderProvider)!, targetDirPath);
   }
 
   int totalTaskCount(Folder rootFolder) {
