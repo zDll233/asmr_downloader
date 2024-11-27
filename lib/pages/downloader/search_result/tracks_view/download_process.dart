@@ -1,4 +1,5 @@
 import 'package:asmr_downloader/models/track_item.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/middle_ellipsis_text.dart';
 import 'package:asmr_downloader/services/download/download_manager.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:flutter/material.dart';
@@ -26,17 +27,7 @@ class DownloadProcess extends StatelessWidget {
             );
           },
         ),
-        Spacer(),
-        Consumer(
-          builder: (_, WidgetRef ref, __) {
-            final currentDl = ref.watch(currentDlNoProvider);
-            final total = ref.watch(totalTaskCntProvider);
-            return SizedBox(
-              width: appWidth * 0.07,
-              child: Center(child: Text('$currentDl/$total')),
-            );
-          },
-        ),
+        SizedBox(width: appWidth * 0.01),
         Consumer(
           builder: (_, WidgetRef ref, __) {
             final process = ref.watch(processProvider);
@@ -54,22 +45,28 @@ class DownloadProcess extends StatelessWidget {
                     left: 5,
                     child: SizedBox(
                       width: appWidth * 0.32,
-                      child: Text(
-                        currentFileName,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      child: Row(children: ellipsisInMiddle(currentFileName)),
                     )),
               ]),
             );
           },
         ),
+        SizedBox(width: appWidth * 0.01),
         Consumer(
           builder: (_, WidgetRef ref, __) {
             final process = ref.watch(processProvider);
+            return Center(
+                child: Text('${(process * 100).toStringAsFixed(2)}%'));
+          },
+        ),
+        Spacer(),
+        Consumer(
+          builder: (_, WidgetRef ref, __) {
+            final currentDl = ref.watch(currentDlNoProvider);
+            final total = ref.watch(totalTaskCntProvider);
             return SizedBox(
               width: appWidth * 0.07,
-              child:
-                  Center(child: Text('${(process * 100).toStringAsFixed(2)}%')),
+              child: Center(child: Text('$currentDl / $total')),
             );
           },
         ),

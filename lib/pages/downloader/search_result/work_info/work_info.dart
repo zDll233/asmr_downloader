@@ -1,7 +1,6 @@
-import 'package:asmr_downloader/services/download/download_providers.dart';
-import 'package:asmr_downloader/services/download/download_manager.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/work_info/copyable_textbox.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
-import 'package:asmr_downloader/models/track_item.dart';
+import 'package:asmr_downloader/utils/log.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -31,39 +30,30 @@ class WorkInfo extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
-                    child: Consumer(
-                      builder: (_, WidgetRef ref, __) {
-                        final downloading = ref.watch(dlStatusProvider) ==
-                            DownloadStatus.downloading;
-                        return TextButton(
-                            style: TextButton.styleFrom(
-                                backgroundColor: Colors.blueGrey),
-                            onPressed: downloading
-                                ? null
-                                : DownloadManager(ref: ref).run,
-                            child: Text(
-                              downloading ? '下载中' : '创建目录',
-                              style: TextStyle(color: Colors.white70),
-                            ));
-                      },
-                    ),
-                  ),
                   FadeInImage(
-                      placeholder: MemoryImage(kTransparentImage),
-                      image: NetworkImage(coverUrl)),
+                    placeholder: MemoryImage(kTransparentImage),
+                    image: NetworkImage(coverUrl),
+                    imageErrorBuilder: (context, error, stackTrace) {
+                      Log.error(
+                          'Failed to load cover image: $error\ncover url: $coverUrl');
+                      return const Icon(Icons.error, color: Colors.red);
+                    },
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                    child: Text(
-                      title,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
+                    child: CopyableTextBox(
+                        text: title,
+                        textStyle: Theme.of(context).textTheme.bodyLarge),
                   ),
                   Wrap(
-                    alignment: WrapAlignment.spaceEvenly,
+                    alignment: WrapAlignment.start,
                     spacing: 8.0,
-                    children: [...cvLs.map((e) => Text(e))],
+                    children: [
+                      ...cvLs.map((e) => CopyableTextBox(
+                            text: e,
+                            backgroundColor: Color.fromRGBO(50, 150, 136, 1),
+                          ))
+                    ],
                   ),
                 ],
               );

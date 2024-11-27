@@ -1,3 +1,4 @@
+import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/middle_ellipsis_text.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/models/track_item.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,7 @@ class TracksState extends ConsumerState<Tracks> {
         ),
       );
     } else {
+      // FileAsset
       trackWidgets.add(
         Padding(
           padding: EdgeInsets.only(left: _lPadding),
@@ -63,12 +65,7 @@ class TracksState extends ConsumerState<Tracks> {
               children: [
                 getIconFromType(track.type),
                 SizedBox(width: 10.0),
-                Flexible(
-                  child: Text(
-                    track.title,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
+                ...ellipsisInMiddle(track.title),
               ],
             ),
           ),
@@ -87,7 +84,7 @@ class TracksState extends ConsumerState<Tracks> {
       case 'text':
         return Icon(Icons.text_snippet, color: Colors.grey);
       default:
-        return Icon(Icons.error, color: Colors.red);
+        return Icon(Icons.error, color: Colors.white);
     }
   }
 }

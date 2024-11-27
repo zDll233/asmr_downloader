@@ -52,3 +52,42 @@ final coverUrlProvider = Provider<String>((ref) {
     orElse: () => '',
   );
 });
+
+// final tagLsProvider = Provider<List<String>>((ref) {
+//   final workInfo = ref.watch(workInfoProvider);
+//   return workInfo.maybeWhen(
+//     data: (data) {
+//       if (data == null) {
+//         return [];
+//       }
+//       return (data['tags'] as List).map((e) => e['name'].toString()).toList();
+//     },
+//     orElse: () => [],
+//   );
+// });
+
+// final releaseDateProvider = Provider<String>((ref) {
+//   final workInfo = ref.watch(workInfoProvider);
+//   return workInfo.maybeWhen(
+//     data: (data) {
+//       if (data == null) {
+//         return '';
+//       }
+//       return data['release'].toString();
+//     },
+//     orElse: () => '',
+//   );
+// });
+
+// final dlCountProvider = Provider<int>((ref) {
+//   final workInfo = ref.watch(workInfoProvider);
+//   return workInfo.maybeWhen(
+//     data: (data) {
+//       if (data == null) {
+//         return 0;
+//       }
+//       return data['dl_count'] as int;
+//     },
+//     orElse: () => 0,
+//   );
+// });
