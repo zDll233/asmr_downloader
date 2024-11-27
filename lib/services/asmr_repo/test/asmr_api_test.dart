@@ -26,7 +26,7 @@ void main() {
   group('ASMRAPI', () {
     test('get playlist', () async {
       final playlist = await asmrApi.getPlaylists(page: 1);
-      printFormattedMap(playlist);
+      printFormattedMap(playlist!);
     });
 
     // getSearchResult
@@ -39,19 +39,19 @@ void main() {
           'filterBy': 'all',
         },
       );
-      printFormattedMap(searchResults);
+      printFormattedMap(searchResults!);
     });
 
     // getWorkInfo
     test('get work info', () async {
       final workInfo = await asmrApi.getWorkInfo(rj: 'RJ422979');
-      printFormattedMap(workInfo);
+      printFormattedMap(workInfo!);
     });
 
     // getVoiceTracks
     test('get voice tracks', () async {
       final voiceTracks = await asmrApi.getTracks(rj: 'RJ422979');
-      for (var voiceTrack in voiceTracks) {
+      for (var voiceTrack in voiceTracks!) {
         printFormattedMap(voiceTrack);
       }
     });
