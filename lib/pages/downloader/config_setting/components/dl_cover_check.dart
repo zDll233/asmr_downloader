@@ -1,4 +1,5 @@
-import 'package:asmr_downloader/common/config.dart';
+import 'package:asmr_downloader/common/config_providers.dart';
+import 'package:asmr_downloader/utils/log.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,6 +23,8 @@ class DlCoverCheck extends ConsumerWidget {
                 }
                 ref.read(dlCoverProvider.notifier).state = value;
                 ref.read(configFileProvider).addOrUpdate({'dlCover': value});
+
+                Log.info('dlCover: $value');
               },
             ),
           ],

@@ -1,5 +1,5 @@
 import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
-import 'package:asmr_downloader/common/config.dart';
+import 'package:asmr_downloader/common/config_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,7 +27,7 @@ class AsmrApiHost extends ConsumerWidget {
             if (newValue == null) return;
             ref.read(apiHostProvider.notifier).state = newValue;
             ref.read(configFileProvider).addOrUpdate({'apiHost': newValue});
-            ref.read(asmrApiProvider).setHost('api.$newValue.com');
+            ref.read(asmrApiProvider).setApiHost(newValue);
           },
         ),
       ),

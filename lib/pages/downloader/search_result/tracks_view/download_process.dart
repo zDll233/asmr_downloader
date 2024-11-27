@@ -29,7 +29,7 @@ class DownloadProcess extends StatelessWidget {
         Spacer(),
         Consumer(
           builder: (_, WidgetRef ref, __) {
-            final currentDl = ref.watch(currentDlProvider);
+            final currentDl = ref.watch(currentDlNoProvider);
             final total = ref.watch(totalTaskCntProvider);
             return SizedBox(
               width: appWidth * 0.07,

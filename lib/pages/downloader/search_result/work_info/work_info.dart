@@ -42,7 +42,7 @@ class WorkInfo extends StatelessWidget {
                                 backgroundColor: Colors.blueGrey),
                             onPressed: downloading
                                 ? null
-                                : DownloadManager(ref: ref).createFolder,
+                                : DownloadManager(ref: ref).run,
                             child: Text(
                               downloading ? '下载中' : '创建目录',
                               style: TextStyle(color: Colors.white70),

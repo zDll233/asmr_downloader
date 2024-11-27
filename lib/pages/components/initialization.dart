@@ -1,4 +1,5 @@
-import 'package:asmr_downloader/common/config.dart';
+import 'package:asmr_downloader/common/config_providers.dart';
+import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,14 +46,18 @@ class _InitializationState extends ConsumerState<Initialization> {
 }
 
 final _initProvider = FutureProvider.autoDispose((ref) async {
-  // await ref.read(asmrApiProvider).login();
-
   final config = await ref.read(configFileProvider).read();
-  ref.read(downloadPathProvider.notifier).state =
-      config['dlPath'] as String? ?? '';
-  ref.read(dlCoverProvider.notifier).state = config['dlCover'] as bool? ?? true;
-  ref.read(clashProxyProvider.notifier).state =
-      config['clashProxy'] as bool? ?? false;
   ref.read(apiHostProvider.notifier).state =
       config['apiHost'] as String? ?? 'asmr-200';
+  ref.read(clashProxyProvider.notifier).state =
+      config['clashProxy'] as String? ?? 'DIRECT';
+  ref.read(downloadPathProvider.notifier).state =
+      config['dlPath'] as String? ?? '';
+  ref.read(dlCoverProvider.notifier).state =
+      config['dlCover'] as bool? ?? false;
+
+
+  ref.read(asmrApiProvider)
+    ..setApiHost(ref.read(apiHostProvider))
+    ..proxy = ref.read(clashProxyProvider);
 });

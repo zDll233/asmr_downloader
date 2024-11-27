@@ -158,7 +158,7 @@ class CloseBtn extends ConsumerWidget {
         // before close
         final dlStatus = ref.read(dlStatusProvider);
         if (dlStatus == DownloadStatus.downloading) {
-          await showDialog(
+          showDialog(
             context: context,
             builder: (context) {
               return AlertDialog(
@@ -182,6 +182,8 @@ class CloseBtn extends ConsumerWidget {
               );
             },
           );
+        }else{
+          windowManager.close();
         }
       },
       buttonBgColorScheme: _closeButtonBgColorScheme,

@@ -23,66 +23,59 @@ class AsmrApi {
         'Chrome/78.0.3904.108 Safari/537.36',
   };
 
-  late Dio _dio;
+  late final Dio _apiDio;
+  late final Dio _dlDio;
 
-  final String name;
-  final String password;
-  String? _proxy;
+  String _proxy = 'DIRECT';
 
-  String? get proxy => _proxy;
-  set proxy(String? proxy) {
+  String get proxy => _proxy;
+
+  set proxy(String proxy) {
     _proxy = proxy;
-    _setUpProxy(proxy);
+    _setUpProxy(_apiDio, _proxy);
+    _setUpProxy(_dlDio, _proxy);
+
+    Log.info('Proxy set to: $proxy');
   }
 
-  AsmrApi({
-    required this.name,
-    required this.password,
-    String? proxy,
-  }) : _proxy = proxy {
-    BaseOptions options = BaseOptions(
-      baseUrl: _baseApiUrl,
-      headers: _headers,
-      connectTimeout: Duration(seconds: 10),
-      receiveTimeout: Duration(seconds: 15),
-      sendTimeout: Duration(seconds: 15),
-    );
-
-    _dio = Dio(options);
-
-    _setUpProxy(_proxy);
+  AsmrApi() {
+    _apiDio = Dio(BaseOptions(
+      connectTimeout: Duration(seconds: 5),
+      receiveTimeout: Duration(seconds: 10),
+      sendTimeout: Duration(seconds: 10),
+    ));
+    _dlDio = Dio(BaseOptions(
+      connectTimeout: Duration(seconds: 5),
+      receiveTimeout: Duration(seconds: 10),
+      sendTimeout: Duration(seconds: 10),
+    ));
   }
 
-  void setHost(String host) {
-    _baseApiUrl = 'https://$host/api/';
-    _headers['Host'] = host;
-    _dio.options
-      ..baseUrl = _baseApiUrl
-      ..headers = _headers;
-  }
-
-  void _setUpProxy(String? proxy) {
-    String p = proxy ?? 'DIRECT';
-    _dio.httpClientAdapter = IOHttpClientAdapter(
+  void _setUpProxy(Dio dioCliecnt, String proxy) {
+    dioCliecnt.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
-        client.findProxy = (uri) => 'PROXY $p';
+        client.findProxy = (uri) => proxy;
         return client;
       },
     );
   }
 
-  /// Sets the API channel by updating the base URL and host header.
-  void setApiChannel(String apiChannel) {
-    _baseApiUrl = 'https://$apiChannel/api/';
-    _headers['Host'] = apiChannel;
-    _dio.options.baseUrl = _baseApiUrl;
+  void setApiHost(String host) {
+    host = 'api.$host.com';
+    _baseApiUrl = 'https://$host/api/';
+    _headers['Host'] = host;
+    _apiDio.options
+      ..baseUrl = _baseApiUrl
+      ..headers = _headers;
+
+    Log.info('Host set to: $host\nAPI URL set to: $_baseApiUrl');
   }
 
   /// Logs in the user and updates the authorization header.
-  Future<void> login() async {
+  Future<void> login(String name, String password) async {
     try {
-      final response = await _dio.post(
+      final response = await _apiDio.post(
         'auth/me',
         data: {'name': name, 'password': password},
       );
@@ -90,7 +83,7 @@ class AsmrApi {
       if (response.statusCode == 200) {
         final token = response.data['token'];
         _headers['Authorization'] = 'Bearer $token';
-        _dio.options.headers = _headers;
+        _apiDio.options.headers = _headers;
 
         Log.info('Login successfully');
       } else {
@@ -111,7 +104,7 @@ class AsmrApi {
     while (tryCount < maxTry && response == null) {
       try {
         tryCount++;
-        response = await _dio.get(
+        response = await _apiDio.get(
           route,
           queryParameters: params,
         );
@@ -138,7 +131,7 @@ class AsmrApi {
     while (tryCount < maxTry && response == null) {
       try {
         tryCount++;
-        response = await _dio.post(
+        response = await _apiDio.post(
           route,
           data: data,
         );
@@ -155,6 +148,51 @@ class AsmrApi {
       }
     }
     Log.error('Post request to "$route" failed after $maxTry tries');
+  }
+
+  Future<Response<dynamic>> download(
+    String urlPath,
+    dynamic savePath, {
+    void Function(int, int)? onReceiveProgress,
+    Map<String, dynamic>? queryParameters,
+    CancelToken? cancelToken,
+    bool deleteOnError = true,
+    String lengthHeader = Headers.contentLengthHeader,
+    Object? data,
+    Options? options,
+  }) {
+    return _dlDio.download(
+      urlPath,
+      savePath,
+      onReceiveProgress: onReceiveProgress,
+      queryParameters: queryParameters,
+      cancelToken: cancelToken,
+      deleteOnError: deleteOnError,
+      lengthHeader: lengthHeader,
+      data: data,
+      options: options,
+    );
+  }
+
+  Future<Response<T>> head<T>(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) {
+    return _apiDio.head(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+      cancelToken: cancelToken,
+    );
+  }
+
+  /// Retrieves the user's profile.
+  Future<Map<String, dynamic>> getProfile() async {
+    return await get('auth/me');
   }
 
   /// Retrieves playlists with pagination and filtering.

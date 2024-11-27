@@ -1,5 +1,5 @@
+import 'package:asmr_downloader/common/config_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
-import 'package:asmr_downloader/common/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,16 +16,15 @@ class ClashProxy extends ConsumerWidget {
           children: [
             Text('clash代理'),
             Checkbox(
-              value: clashProxy,
+              value: clashProxy != 'DIRECT',
               onChanged: (value) {
                 if (value == null) {
                   return;
                 }
-                ref.read(clashProxyProvider.notifier).state = value;
-                ref.read(configFileProvider).addOrUpdate({'clashProxy': value});
-
-                ref.read(asmrApiProvider).proxy =
-                    value ? '127.0.0.1:7890' : null;
+                final proxy = value ? 'PROXY 127.0.0.1:7890' : 'DIRECT';
+                ref.read(clashProxyProvider.notifier).state = proxy;
+                ref.read(configFileProvider).addOrUpdate({'clashProxy': proxy});
+                ref.read(asmrApiProvider).proxy = proxy;
               },
             ),
           ],

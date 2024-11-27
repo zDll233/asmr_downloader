@@ -1,6 +1,8 @@
 import 'dart:io';
 
-import 'package:asmr_downloader/common/config.dart';
+import 'package:asmr_downloader/common/config_providers.dart';
+import 'package:asmr_downloader/services/asmr_repo/asmr_api.dart';
+import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
 import 'package:asmr_downloader/models/track_item.dart';
@@ -12,40 +14,47 @@ import 'package:path/path.dart' as p;
 
 class DownloadManager {
   final WidgetRef ref;
-  DownloadManager({required this.ref});
-
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: Duration(seconds: 10),
-      receiveTimeout: Duration(seconds: 15),
-      sendTimeout: Duration(seconds: 15),
-    ),
-  );
+  late final AsmrApi _api;
+  DownloadManager({required this.ref}) : _api = ref.read(asmrApiProvider);
 
   Future<void> run() async {
-    final rootFolderSnapshot = ref.read(rootFolderProvider)?.copyWith();
-    if (rootFolderSnapshot == null) {
-      return;
-    }
-
     ref.read(dlStatusProvider.notifier).state = DownloadStatus.downloading;
 
-    ref.read(currentDlProvider.notifier).state = 0;
-    ref.read(totalTaskCntProvider.notifier).state =
-        totalTaskCount(rootFolderSnapshot);
-    await createFolder();
+    ref.read(currentDlNoProvider.notifier).state = 0;
 
     final targetDirPath = ref.read(targetDirPathProvider);
-    await _downloadTrackItem(rootFolderSnapshot, targetDirPath);
+    await Directory(targetDirPath).create(recursive: true);
+
+    // root Folder cnt
+    int rootFolderTaskCnt = 0;
+    final rootFolderSnapshot = ref.read(rootFolderProvider)?.copyWith();
+    if (rootFolderSnapshot == null) {
+      Log.error('Download failed: Root folder is null');
+    } else {
+      rootFolderTaskCnt = countTotalTask(rootFolderSnapshot);
+      ref.read(totalTaskCntProvider.notifier).state = rootFolderTaskCnt;
+    }
+
+    // download cover
+    if (ref.read(dlCoverProvider)) {
+      ref.read(totalTaskCntProvider.notifier).state++;
+      final rj = ref.read(rjProvider);
+      await _downloadCover(rj, p.join(targetDirPath, rj));
+    }
+
+    // download root folder
+    if (rootFolderTaskCnt > 0) {
+      await _downloadTrackItem(rootFolderSnapshot!, targetDirPath);
+    }
 
     ref.read(dlStatusProvider.notifier).state = DownloadStatus.completed;
   }
 
-  int totalTaskCount(Folder rootFolder) {
+  int countTotalTask(Folder rootFolder) {
     int totalTaskCnt = 0;
     for (final child in rootFolder.children) {
       if (child is Folder) {
-        totalTaskCnt += totalTaskCount(child);
+        totalTaskCnt += countTotalTask(child);
       } else if (child.selected) {
         totalTaskCnt++;
       }
@@ -53,32 +62,26 @@ class DownloadManager {
     return totalTaskCnt;
   }
 
-  Future<void> createFolder() async {
-    final rj = ref.read(rjProvider);
-    final rjDirPath = p.join(ref.read(targetDirPathProvider), rj);
-
-    final dlCover = ref.read(dlCoverProvider);
-    if (!dlCover) {
-      Directory(rjDirPath).createSync(recursive: true);
-      return;
-    }
-
-    // 下载cover
-    final coverUrl = ref.read(coverUrlProvider);
-    FileAsset coverFile = FileAsset(
-      id: '${rj}_cover',
-      type: 'image',
-      title: '下载封面',
-      mediaStreamUrl: coverUrl,
-      mediaDownloadUrl: coverUrl,
-      size: -1,
-      savePath: p.join(rjDirPath, '${rj}_cover.jpg'),
-    );
-
+  /// 下载cover
+  Future<void> _downloadCover(String rj, String rjDirPath) async {
     try {
-      await _downloadTask(coverFile);
+      final coverUrl = ref.read(coverUrlProvider);
+      final response = await _api.head(coverUrl);
+      final coverSize = int.parse(response.headers.value('content-length')!);
+
+      FileAsset coverFile = FileAsset(
+        id: '${rj}_cover',
+        type: 'image',
+        title: '${rj}_cover.jpg',
+        mediaStreamUrl: coverUrl,
+        mediaDownloadUrl: coverUrl,
+        size: coverSize,
+        savePath: p.join(rjDirPath, '${rj}_cover.jpg'),
+      )..selected = true;
+
+      await _downloadTrackItem(coverFile, rjDirPath);
     } catch (e) {
-      Log.error('Download cover failed: $e');
+      Log.error('Download cover failed.\nerror: $e');
     }
   }
 
@@ -92,50 +95,43 @@ class DownloadManager {
       }
     } else if (trackItem is FileAsset) {
       if (trackItem.selected) {
-        try {
-          trackItem.savePath = targetPath;
-          await _downloadTask(trackItem);
-        } catch (e) {
-          Log.error('Download ${trackItem.title} failed: $e');
-        }
+        trackItem.savePath = targetPath;
+        await _downloadFileAsset(trackItem);
       }
     }
   }
 
   // 开始下载任务
-  Future<void> _downloadTask(FileAsset task) async {
-    task.status = DownloadStatus.downloading;
-    try {
-      ref.read(currentFileNameProvider.notifier).state = task.title;
-      ref.read(processProvider.notifier).state = 0;
-      ref.read(currentDlProvider.notifier).state++;
-      final dlFlag = await _resumableDownload(
-        task.mediaDownloadUrl,
-        task.savePath,
-        task.size,
-        cancelToken: task.cancelToken,
-        onReceiveProgress: (received, total) {
-          if (total > 0) {
-            task.progress = received / total;
-            ref.read(processProvider.notifier).state = task.progress;
-          }
-        },
-      );
+  /// need to specify task.savePath otherwise it will be empty
+  Future<void> _downloadFileAsset(FileAsset task) async {
+    ref.read(currentFileNameProvider.notifier).state = task.title;
+    ref.read(processProvider.notifier).state = 0;
+    ref.read(currentDlNoProvider.notifier).state++;
 
-      if (dlFlag) {
-        // 如果文件已存在，不会调用onReceiveProgress，需要手动设置进度
-        task.status = DownloadStatus.completed;
-        task.progress = 1.0;
-        ref.read(processProvider.notifier).state = 1.0;
-      }
-    } on DioException catch (e) {
-      if (CancelToken.isCancel(e)) {
-        task.status = DownloadStatus.canceled;
-      } else {
-        task.status = DownloadStatus.failed;
-      }
-    } catch (e) {
-      task.status = DownloadStatus.failed;
+    Log.info('Start downloading: ${task.title}\n'
+        'URL: ${task.mediaDownloadUrl}\n'
+        'Save path: ${task.savePath}');
+
+    final dlFlag = await _resumableDownload(
+      task.mediaDownloadUrl,
+      task.savePath,
+      task.size,
+      cancelToken: task.cancelToken,
+      onReceiveProgress: (received, total) {
+        if (total > 0) {
+          task.progress = received / total;
+          ref.read(processProvider.notifier).state = task.progress;
+        }
+      },
+    );
+
+    if (dlFlag) {
+      // 如果文件已存在，不会调用onReceiveProgress，需要手动设置进度
+      task.status = DownloadStatus.completed;
+      task.progress = 1.0;
+      ref.read(processProvider.notifier).state = 1.0;
+
+      Log.info('Download completed: ${task.title}');
     }
   }
 
@@ -184,7 +180,7 @@ class DownloadManager {
         }
 
         if (downloadedBytes == 0) {
-          response = await _dio.download(
+          response = await _api.download(
             urlPath,
             savePath,
             cancelToken: cancelToken,
@@ -192,7 +188,7 @@ class DownloadManager {
             onReceiveProgress: onReceiveProgress,
           );
         } else if (downloadedBytes < fileSize) {
-          response = await _dio.download(
+          response = await _api.download(
             urlPath,
             tmpSavePath,
             cancelToken: cancelToken,
@@ -204,17 +200,16 @@ class DownloadManager {
                 Options(headers: {'range': 'bytes=$downloadedBytes-$fileSize'}),
           );
         } else if (downloadedBytes == fileSize) {
-          Log.info('Download completed: $savePath');
           return true;
         } else {
-          // cover自定义的filesize=-1
-          if (fileSize != -1) {
-            Log.error('Download failed: downloadedBytes > fileSize');
-            return false;
-          }
+          // downloadedBytes > fileSize
+
+          Log.error('Download failed: downloadedBytes > fileSize');
+          return false;
         }
       } catch (e) {
-        Log.error('Download failed: $e');
+        Log.error('Download failed.\nerror: $e');
+        await Future.delayed(Duration(seconds: 2));
       } finally {
         await mergeFile(file, tmpFile);
       }

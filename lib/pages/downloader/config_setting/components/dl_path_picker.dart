@@ -1,5 +1,6 @@
-import 'package:asmr_downloader/common/config.dart';
+import 'package:asmr_downloader/common/config_providers.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
+import 'package:asmr_downloader/utils/log.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,6 +42,8 @@ class DownloadPathPicker extends ConsumerWidget {
                   }
                   ref.read(downloadPathProvider.notifier).state = dlPath;
                   ref.read(configFileProvider).addOrUpdate({'dlPath': dlPath});
+
+                  Log.info('dlPath: $dlPath');
                 },
                 icon: Icon(Icons.folder),
               ),

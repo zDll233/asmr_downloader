@@ -41,5 +41,5 @@ final processProvider = StateProvider<double>((ref) => 0);
 
 final currentFileNameProvider = StateProvider<String>((ref) => '');
 
-final currentDlProvider = StateProvider<int>((ref) => 0);
+final currentDlNoProvider = StateProvider<int>((ref) => 0);
 final totalTaskCntProvider = StateProvider<int>((ref) => 0);
