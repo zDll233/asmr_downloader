@@ -1,16 +1,18 @@
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
+
 import 'package:path/path.dart' as p;
 
 class Log {
-  static final Log _instance = Log._internal();
-
-  late final Logger _logger;
-
   // named constructor
   Log._internal() {
-    final File logFile = File(p.join('debug', 'asmr_downloader.log'));
+    final currentDate = DateTime.now();
+    final logFileName =
+        'asmr_downloader_${currentDate.year}-${currentDate.month}-${currentDate.day}.log';
+    final logFile = File(p.join('debug', logFileName));
+
     if (!logFile.existsSync()) {
       logFile.createSync(recursive: true);
     }
@@ -33,9 +35,9 @@ class Log {
           );
   }
 
-  factory Log() => _instance;
+  late final Logger _logger;
 
-  // 提供静态方法获取 Logger 实例
+  static final Log _instance = Log._internal();
   static Logger get logger => _instance._logger;
 
   static void trace(String message) {
