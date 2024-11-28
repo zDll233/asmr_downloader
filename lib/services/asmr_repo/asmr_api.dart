@@ -96,9 +96,9 @@ class AsmrApi {
     }
   }
 
-  /// Generic GET request with retry logic.
+  /// Generic [GET] request with retry logic.
   Future<dynamic> get(String route,
-      {Map<String, dynamic>? params, int maxTry = 5}) async {
+      {Map<String, dynamic>? params, int maxTry = 3}) async {
     int tryCount = 0;
     Response? response;
     while (tryCount < maxTry && response == null) {
@@ -108,21 +108,21 @@ class AsmrApi {
           route,
           queryParameters: params,
         );
-        Log.info('GET request to "$route" successfully');
+        Log.info('[GET] request to "$route" successfully');
         return response.data;
       } catch (e) {
         Log.warning(
-            'Current try: $tryCount\nError during GET request to "$route": $e');
-        await Future.delayed(Duration(seconds: 2));
+            'Current try: $tryCount\nError during [GET] request to "$route": $e');
+        await Future.delayed(Duration(seconds: 3));
       }
     }
-    Log.error('GET request to "$route" failed after $maxTry tries');
+    Log.error('[GET] request to "$route" failed after $maxTry tries');
     return null;
   }
 
-  /// Generic POST request with retry logic.
+  /// Generic [POST] request with retry logic.
   Future<dynamic> post(String route,
-      {Map<String, dynamic>? data, int maxTry = 5}) async {
+      {Map<String, dynamic>? data, int maxTry = 3}) async {
     int tryCount = 0;
     Response? response;
     while (tryCount < maxTry && response == null) {
@@ -132,12 +132,12 @@ class AsmrApi {
           route,
           data: data,
         );
-        Log.info('POST request to "$route" successfully');
+        Log.info('[[POST]] request to "$route" successfully');
         return response.data;
       } catch (e) {
         Log.warning(
-            'Current try: $tryCount\nError during POST request to "$route": $e');
-        await Future.delayed(Duration(seconds: 2));
+            'Current try: $tryCount\nError during [POST] request to "$route": $e');
+        await Future.delayed(Duration(seconds: 3));
       }
     }
     Log.error('Post request to "$route" failed after $maxTry tries');

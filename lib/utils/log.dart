@@ -8,31 +8,34 @@ import 'package:path/path.dart' as p;
 class Log {
   // named constructor
   Log._internal() {
-    final currentDate = DateTime.now();
-    final logFileName =
-        'asmr_downloader_${currentDate.year}-${currentDate.month}-${currentDate.day}.log';
-    final logFile = File(p.join('debug', logFileName));
+    if (kDebugMode) {
+      _logger = Logger(
+        printer: PrettyPrinter(
+          methodCount: 5,
+          dateTimeFormat: DateTimeFormat.dateAndTime,
+        ),
+      );
+    } else {
+      final currentDate = DateTime.now();
+      final logFile = File(p.join(
+        'debug',
+        'asmr_downloader_${currentDate.year}-${currentDate.month}-${currentDate.day}.log',
+      ));
 
-    if (!logFile.existsSync()) {
-      logFile.createSync(recursive: true);
+      if (!logFile.existsSync()) {
+        logFile.createSync(recursive: true);
+      }
+
+      _logger = Logger(
+        filter: ProductionFilter(),
+        printer: PrettyPrinter(
+            methodCount: 0,
+            colors: false,
+            dateTimeFormat: DateTimeFormat.dateAndTime),
+        output: FileOutput(file: logFile),
+        level: Level.info,
+      );
     }
-
-    _logger = kDebugMode
-        ? Logger(
-            printer: PrettyPrinter(
-              methodCount: 5,
-              dateTimeFormat: DateTimeFormat.dateAndTime,
-            ),
-          )
-        : Logger(
-            filter: ProductionFilter(),
-            printer: PrettyPrinter(
-                methodCount: 0,
-                colors: false,
-                dateTimeFormat: DateTimeFormat.dateAndTime),
-            output: FileOutput(file: logFile),
-            level: Level.info,
-          );
   }
 
   late final Logger _logger;

@@ -29,7 +29,7 @@ class DownloadManager {
     int rootFolderTaskCnt = 0;
     final rootFolderSnapshot = ref.read(rootFolderProvider)?.copyWith();
     if (rootFolderSnapshot == null) {
-      Log.error('Download failed: Root folder is null');
+      Log.fatal('Download failed: Root folder is null');
     } else {
       rootFolderTaskCnt = countTotalTask(rootFolderSnapshot);
       ref.read(totalTaskCntProvider.notifier).state = rootFolderTaskCnt;
@@ -67,7 +67,7 @@ class DownloadManager {
     try {
       final coverUrl = ref.read(coverUrlProvider);
       final response = await _api.head(coverUrl);
-      final coverSize = int.parse(response.headers.value('content-length')!);
+      final coverSize = int.parse(response.headers.value('Content-Length')!);
 
       FileAsset coverFile = FileAsset(
         id: '${rj}_cover',
@@ -81,7 +81,7 @@ class DownloadManager {
 
       await _downloadTrackItem(coverFile, rjDirPath);
     } catch (e) {
-      Log.error('Download cover failed.\nerror: $e');
+      Log.error('Download cover failed: ${rj}_cover.jpg\nerror: $e');
     }
   }
 
@@ -152,6 +152,8 @@ class DownloadManager {
     CancelToken? cancelToken,
     void Function(int, int)? onReceiveProgress,
   }) async {
+    final fileName = p.basename(savePath);
+
     // ignore: unused_local_variable
     Response? response;
     final file = File(savePath);
@@ -188,6 +190,8 @@ class DownloadManager {
             onReceiveProgress: onReceiveProgress,
           );
         } else if (downloadedBytes < fileSize) {
+          Log.info(
+              'Resume downloading: $fileName\ndownloadedBytes: $downloadedBytes, fileSize: $fileSize');
           response = await _api.download(
             urlPath,
             tmpSavePath,
@@ -204,12 +208,12 @@ class DownloadManager {
         } else {
           // downloadedBytes > fileSize
 
-          Log.error('Download failed: downloadedBytes > fileSize');
+          Log.error('Download failed:$fileName\nerror: downloadedBytes > fileSize');
           return false;
         }
       } catch (e) {
-        Log.error('Download failed.\nerror: $e');
-        await Future.delayed(Duration(seconds: 2));
+        Log.warning('Download failed: $fileName\nerror: $e');
+        await Future.delayed(Duration(seconds: 3));
       } finally {
         await mergeFile(file, tmpFile);
       }
