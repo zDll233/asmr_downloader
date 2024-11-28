@@ -56,8 +56,11 @@ class SearchBoxState extends ConsumerState<SearchBox> {
                     onPressed: dlStatus == DownloadStatus.downloading
                         ? null
                         : () {
-                            final rj = _inputText.replaceAll(
+                            String rj = _inputText.replaceAll(
                                 RegExp(r'[^a-zA-Z0-9]'), '');
+                            if (!rj.startsWith('RJ')) {
+                              rj = 'RJ${rj.replaceAll(RegExp(r'[^0-9]'), '')}';
+                            }
                             ref.read(rjProvider.notifier).state = rj;
                           },
                     // null,

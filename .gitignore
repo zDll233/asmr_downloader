@@ -43,3 +43,5 @@ app.*.map.json
 /android/app/release
 
 asmr_dl_config.json
+
+copy_release.bat

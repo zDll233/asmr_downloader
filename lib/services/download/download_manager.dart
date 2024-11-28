@@ -29,7 +29,7 @@ class DownloadManager {
     int rootFolderTaskCnt = 0;
     final rootFolderSnapshot = ref.read(rootFolderProvider)?.copyWith();
     if (rootFolderSnapshot == null) {
-      Log.fatal('Download failed: Root folder is null');
+      Log.fatal('Download failed\n' 'error: rootFolder is null');
     } else {
       rootFolderTaskCnt = countTotalTask(rootFolderSnapshot);
       ref.read(totalTaskCntProvider.notifier).state = rootFolderTaskCnt;
@@ -64,11 +64,10 @@ class DownloadManager {
 
   /// 下载cover
   Future<void> _downloadCover(String rj, String rjDirPath) async {
-    try {
-      final coverUrl = ref.read(coverUrlProvider);
-      final response = await _api.head(coverUrl);
-      final coverSize = int.parse(response.headers.value('Content-Length')!);
+    final coverUrl = ref.read(coverUrlProvider);
+    final int? coverSize = await _api.tryGetContentLength(coverUrl);
 
+    if (coverSize != null) {
       FileAsset coverFile = FileAsset(
         id: '${rj}_cover',
         type: 'image',
@@ -80,8 +79,9 @@ class DownloadManager {
       )..selected = true;
 
       await _downloadTrackItem(coverFile, rjDirPath);
-    } catch (e) {
-      Log.error('Download cover failed: ${rj}_cover.jpg\nerror: $e');
+    } else {
+      Log.error('Download cover failed: ${rj}_cover.jpg\n'
+          'error: cover size is null');
     }
   }
 
@@ -154,8 +154,6 @@ class DownloadManager {
   }) async {
     final fileName = p.basename(savePath);
 
-    // ignore: unused_local_variable
-    Response? response;
     final file = File(savePath);
 
     final tmpSavePath = '$savePath.tmp';
@@ -182,7 +180,7 @@ class DownloadManager {
         }
 
         if (downloadedBytes == 0) {
-          response = await _api.download(
+          await _api.download(
             urlPath,
             savePath,
             cancelToken: cancelToken,
@@ -190,9 +188,9 @@ class DownloadManager {
             onReceiveProgress: onReceiveProgress,
           );
         } else if (downloadedBytes < fileSize) {
-          Log.info(
-              'Resume downloading: $fileName\ndownloadedBytes: $downloadedBytes, fileSize: $fileSize');
-          response = await _api.download(
+          Log.info('Resume downloading: $fileName\n'
+              'downloadedBytes: $downloadedBytes, fileSize: $fileSize');
+          await _api.download(
             urlPath,
             tmpSavePath,
             cancelToken: cancelToken,
@@ -208,12 +206,23 @@ class DownloadManager {
         } else {
           // downloadedBytes > fileSize
 
-          Log.error('Download failed:$fileName\nerror: downloadedBytes > fileSize');
+          Log.error('Download failed: $fileName\n'
+              'error: downloadedBytes > fileSize');
           return false;
         }
-      } catch (e) {
-        Log.warning('Download failed: $fileName\nerror: $e');
+      } on DioException catch (e) {
+        if (e.response?.statusCode == 416) {
+          Log.error('Download failed: $fileName\n'
+              'statusCode = 416, range incorrect\n'
+              'error: $e');
+          return false;
+        }
+
+        Log.warning('Download failed: $fileName\n' 'error: $e');
         await Future.delayed(Duration(seconds: 3));
+      } catch (e) {
+        Log.error('Download failed: $fileName\n' 'Unhandled error: $e');
+        return false;
       } finally {
         await mergeFile(file, tmpFile);
       }

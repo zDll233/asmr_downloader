@@ -38,7 +38,7 @@ class _InitializationState extends ConsumerState<Initialization> {
         ),
       );
     } else if (result.hasError) {
-      return const Text('Error initializing.');
+      return const Text('Error initializing');
     }
 
     return widget.child;

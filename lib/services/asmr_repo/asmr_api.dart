@@ -111,8 +111,9 @@ class AsmrApi {
         Log.info('[GET] request to "$route" successfully');
         return response.data;
       } catch (e) {
-        Log.warning(
-            'Current try: $tryCount\nError during [GET] request to "$route": $e');
+        Log.warning('[GET] request to "$route" failed\n'
+            'Current try: $tryCount\n'
+            'error: $e');
         await Future.delayed(Duration(seconds: 3));
       }
     }
@@ -135,8 +136,9 @@ class AsmrApi {
         Log.info('[[POST]] request to "$route" successfully');
         return response.data;
       } catch (e) {
-        Log.warning(
-            'Current try: $tryCount\nError during [POST] request to "$route": $e');
+        Log.warning('[POST] request to "$route" failed\n'
+            'Current try: $tryCount\n'
+            'error: $e');
         await Future.delayed(Duration(seconds: 3));
       }
     }
@@ -182,6 +184,25 @@ class AsmrApi {
       options: options,
       cancelToken: cancelToken,
     );
+  }
+
+  Future<int?> tryGetContentLength(String urlPath, {int maxTry = 3}) async {
+    int tryCount = 0;
+    Response? response;
+    while (tryCount < maxTry && response == null) {
+      try {
+        tryCount++;
+        response = await head(urlPath);
+        return int.parse(response.headers.value('content-length')!);
+      } catch (e) {
+        Log.warning('Get content-length failed\n'
+            'Current try: $tryCount\n'
+            'error: $e\n');
+        await Future.delayed(Duration(seconds: 3));
+      }
+    }
+    Log.error('Get content-length failed\n' 'URL: $urlPath');
+    return null;
   }
 
   /// Retrieves the user's profile.
