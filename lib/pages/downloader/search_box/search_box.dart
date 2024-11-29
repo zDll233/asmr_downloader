@@ -1,6 +1,7 @@
 import 'package:asmr_downloader/models/track_item.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SearchBox extends ConsumerStatefulWidget {
@@ -68,6 +69,34 @@ class SearchBoxState extends ConsumerState<SearchBox> {
                   );
                 },
               ),
+            ),
+            Consumer(
+              builder: (_, WidgetRef ref, __) {
+                final dlStatus = ref.watch(dlStatusProvider);
+                return IconButton(
+                  onPressed: dlStatus == DownloadStatus.downloading
+                      ? null
+                      : () async {
+                          final clipBoardText =
+                              (await Clipboard.getData('text/plain'))?.text;
+                          if (clipBoardText != null && clipBoardText.isNotEmpty) {
+                            // set original RJ to clipboard
+                            await Clipboard.setData(ClipboardData(text: ref.read(rjProvider)));
+
+                            String rj = clipBoardText.replaceAll(
+                                RegExp(r'[^a-zA-Z0-9]'), '');
+                            if (!rj.startsWith('RJ')) {
+                              rj = 'RJ${rj.replaceAll(RegExp(r'[^0-9]'), '')}';
+                            }
+                            _controller.text = rj;
+                            _inputText = rj;
+                            ref.read(rjProvider.notifier).state = rj;
+                          }
+                        },
+                  // null,
+                  icon: Icon(Icons.content_paste_go),
+                );
+              },
             ),
           ],
         ),
