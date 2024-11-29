@@ -6,6 +6,7 @@ import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart'
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
 import 'package:asmr_downloader/models/track_item.dart';
+import 'package:asmr_downloader/utils/legal_windows_name.dart';
 import 'package:asmr_downloader/utils/log.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,11 +20,7 @@ class DownloadManager {
 
   Future<void> run() async {
     ref.read(dlStatusProvider.notifier).state = DownloadStatus.downloading;
-
     ref.read(currentDlNoProvider.notifier).state = 0;
-
-    final targetDirPath = ref.read(targetDirPathProvider);
-    await Directory(targetDirPath).create(recursive: true);
 
     // root Folder cnt
     int rootFolderTaskCnt = 0;
@@ -34,6 +31,8 @@ class DownloadManager {
       rootFolderTaskCnt = countTotalTask(rootFolderSnapshot);
       ref.read(totalTaskCntProvider.notifier).state = rootFolderTaskCnt;
     }
+
+    final targetDirPath = ref.read(targetDirPathProvider);
 
     // download cover
     if (ref.read(dlCoverProvider)) {
@@ -87,8 +86,10 @@ class DownloadManager {
 
   Future<void> _downloadTrackItem(
       TrackItem trackItem, String targetDirPath) async {
-    final legalTitle = trackItem.title.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
-    final targetPath = p.join(targetDirPath, legalTitle);
+    final targetPath = p.join(
+      targetDirPath,
+      getLegalWindowsName(trackItem.title),
+    );
     if (trackItem is Folder) {
       for (final child in trackItem.children) {
         await _downloadTrackItem(child, targetPath);

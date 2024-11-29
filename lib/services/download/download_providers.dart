@@ -2,6 +2,7 @@ import 'package:asmr_downloader/models/track_item.dart';
 import 'package:asmr_downloader/services/asmr_repo/parse_tracks.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/tracks_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
+import 'package:asmr_downloader/utils/legal_windows_name.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:path/path.dart' as p;
@@ -14,10 +15,8 @@ final targetDirPathProvider = Provider<String>((ref) {
   final cvLs = ref.watch(cvLsProvider);
 
   // cv1&cv2&...&cvn-title
-  final dirName =
-      '${cvLs.join('&')}-$title'.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
-  final targetDirPath = p.join(downloadPath, dirName);
-  return targetDirPath;
+  final dirName = getLegalWindowsName('${cvLs.join('&')}-$title');
+  return p.join(downloadPath, dirName);
 });
 
 final rjProvider = StateProvider<String>((ref) => '');
