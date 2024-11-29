@@ -108,10 +108,6 @@ class DownloadManager {
     ref.read(processProvider.notifier).state = 0;
     ref.read(currentDlNoProvider.notifier).state++;
 
-    Log.info('Start downloading: ${task.title}\n'
-        'URL: ${task.mediaDownloadUrl}\n'
-        'Save path: ${task.savePath}');
-
     final dlFlag = await _resumableDownload(
       task.mediaDownloadUrl,
       task.savePath,
@@ -130,8 +126,6 @@ class DownloadManager {
       task.status = DownloadStatus.completed;
       task.progress = 1.0;
       ref.read(processProvider.notifier).state = 1.0;
-
-      Log.info('Download completed: ${task.title}');
     }
   }
 
@@ -179,29 +173,40 @@ class DownloadManager {
           }
         }
 
-        if (downloadedBytes == 0) {
-          await _api.download(
-            urlPath,
-            savePath,
-            cancelToken: cancelToken,
-            deleteOnError: false,
-            onReceiveProgress: onReceiveProgress,
-          );
-        } else if (downloadedBytes < fileSize) {
-          Log.info('Resume downloading: $fileName\n'
-              'downloadedBytes: $downloadedBytes, fileSize: $fileSize');
-          await _api.download(
-            urlPath,
-            tmpSavePath,
-            cancelToken: cancelToken,
-            deleteOnError: false,
-            onReceiveProgress: (received, total) {
-              onReceiveProgress!(received + downloadedBytes, fileSize);
-            },
-            options:
-                Options(headers: {'range': 'bytes=$downloadedBytes-$fileSize'}),
-          );
+        if (downloadedBytes < fileSize) {
+          if (downloadedBytes == 0) {
+            Log.info('Start downloading: $fileName\n'
+                'URL: $urlPath\n'
+                'Save path: $savePath');
+            await _api.download(
+              urlPath,
+              savePath,
+              cancelToken: cancelToken,
+              deleteOnError: false,
+              onReceiveProgress: onReceiveProgress,
+            );
+          } else {
+            Log.info('Resume downloading: $fileName\n'
+                'downloadedBytes: $downloadedBytes, fileSize: $fileSize\n'
+                'URL: $urlPath\n'
+                'Save path: $savePath');
+            await _api.download(
+              urlPath,
+              tmpSavePath,
+              cancelToken: cancelToken,
+              deleteOnError: false,
+              onReceiveProgress: (received, total) {
+                onReceiveProgress!(received + downloadedBytes, fileSize);
+              },
+              options: Options(
+                  headers: {'range': 'bytes=$downloadedBytes-$fileSize'}),
+            );
+          }
         } else if (downloadedBytes == fileSize) {
+          if (fileSize == 0) {
+            await file.create();
+          }
+          Log.info('Download completed: $fileName');
           return true;
         } else {
           // downloadedBytes > fileSize
