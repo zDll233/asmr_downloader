@@ -6,10 +6,12 @@ import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart'
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
 import 'package:asmr_downloader/models/track_item.dart';
+import 'package:asmr_downloader/services/ui/ui_service.dart';
 import 'package:asmr_downloader/utils/legal_windows_name.dart';
 import 'package:asmr_downloader/utils/log.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:windows_taskbar/windows_taskbar.dart';
 
 import 'package:path/path.dart' as p;
 
@@ -19,34 +21,45 @@ class DownloadManager {
   DownloadManager({required this.ref}) : _api = ref.read(asmrApiProvider);
 
   Future<void> run() async {
+    await UIService(ref).resetProgress();
     ref.read(dlStatusProvider.notifier).state = DownloadStatus.downloading;
-    ref.read(currentDlNoProvider.notifier).state = 0;
 
-    // root Folder cnt
-    int rootFolderTaskCnt = 0;
-    final rootFolderSnapshot = ref.read(rootFolderProvider)?.copyWith();
-    if (rootFolderSnapshot == null) {
-      Log.fatal('Download failed\n' 'error: rootFolder is null');
-    } else {
-      rootFolderTaskCnt = countTotalTask(rootFolderSnapshot);
-      ref.read(totalTaskCntProvider.notifier).state = rootFolderTaskCnt;
-    }
-
+    final rj = ref.read(rjProvider);
     final targetDirPath = ref.read(targetDirPathProvider);
+    if (targetDirPath == '-') {
+      Log.warning('Download failed: $rj\n'
+          'error: Target download path is empty, which means you have to start downloading after work info is loaded');
+    } else {
+      ref.read(currentDlNoProvider.notifier).state = 0;
 
-    // download cover
-    if (ref.read(dlCoverProvider)) {
-      ref.read(totalTaskCntProvider.notifier).state++;
-      final rj = ref.read(rjProvider);
-      await _downloadCover(rj, p.join(targetDirPath, rj));
-    }
+      // root Folder cnt
+      int rootFolderTaskCnt = 0;
+      final rootFolderSnapshot = ref.read(rootFolderProvider)?.copyWith();
+      if (rootFolderSnapshot == null) {
+        Log.fatal('Download failed: $rj\n' 'error: rootFolder is null');
+      } else {
+        rootFolderTaskCnt = countTotalTask(rootFolderSnapshot);
+        ref.read(totalTaskCntProvider.notifier).state = rootFolderTaskCnt;
+      }
 
-    // download root folder
-    if (rootFolderTaskCnt > 0) {
-      await _downloadTrackItem(rootFolderSnapshot!, targetDirPath);
+      // download cover
+      if (ref.read(dlCoverProvider)) {
+        ref.read(totalTaskCntProvider.notifier).state++;
+        await _downloadCover(rj, p.join(targetDirPath, rj));
+      }
+
+      // download root folder
+      if (rootFolderTaskCnt > 0) {
+        await _downloadTrackItem(rootFolderSnapshot!, targetDirPath);
+      }
     }
 
     ref.read(dlStatusProvider.notifier).state = DownloadStatus.completed;
+    await WindowsTaskbar.setFlashTaskbarAppIcon(
+      mode: TaskbarFlashMode.all | TaskbarFlashMode.timernofg,
+      flashCount: 5,
+      timeout: const Duration(milliseconds: 500),
+    );
   }
 
   int countTotalTask(Folder rootFolder) {
@@ -127,6 +140,9 @@ class DownloadManager {
       task.status = DownloadStatus.completed;
       task.progress = 1.0;
       ref.read(processProvider.notifier).state = 1.0;
+
+      await WindowsTaskbar.setProgress(
+          ref.read(currentDlNoProvider), ref.read(totalTaskCntProvider));
     }
   }
 

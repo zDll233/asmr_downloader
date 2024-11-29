@@ -22,6 +22,7 @@ dependencies:
   path_provider: ^2.1.4
   transparent_image: ^2.0.1
   window_manager: ^0.4.2
+  windows_taskbar: ^1.1.2
 
 dev_dependencies:
   flutter_test:
