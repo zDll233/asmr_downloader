@@ -23,7 +23,7 @@ void main() {
     // await asmrApi.login();
   });
 
-  group('ASMRAPI', () {
+  group('AsmrAPI', () {
     test('get playlist', () async {
       final playlist = await asmrApi.getPlaylists(page: 1);
       printFormattedMap(playlist!);
