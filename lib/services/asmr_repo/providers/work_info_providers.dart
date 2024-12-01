@@ -5,13 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final workInfoProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   final api = ref.watch(asmrApiProvider);
-  final rj = ref.watch(rjProvider);
 
-  if (rj.isEmpty) {
-    return Future.value(null);
+  final id = ref.watch(idProvider);
+  if (id == null) {
+    return null;
   }
-  Log.info('fetch workInfo: "$rj"');
-  return api.getWorkInfo(rj: rj);
+
+  Log.info('Fetch workInfo: "$id"');
+  return api.getWorkInfo(id: id);
 });
 
 final titleProvider = Provider<String>((ref) {

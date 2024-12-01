@@ -5,6 +5,8 @@ final configFileProvider = Provider<JsonStorage>((ref) {
   return JsonStorage(filePath: 'asmr_dl_config.json');
 });
 
+final downloadPathProvider = StateProvider<String>((ref) => '');
+
 final dlCoverProvider = StateProvider<bool>((ref) => false);
 
 final clashProxyProvider = StateProvider<String>((ref) => 'DIRECT');

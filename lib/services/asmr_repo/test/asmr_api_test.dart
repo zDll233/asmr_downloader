@@ -14,24 +14,24 @@ void printFormattedMap(Map<String, dynamic> map) {
 }
 
 void main() {
-  late final AsmrApi asmrApi;
+  late final AsmrApi api;
 
   setUpAll(() async {
     Log.debug('set up');
-    asmrApi = AsmrApi();
+    api = AsmrApi();
 
     // await asmrApi.login();
   });
 
   group('AsmrAPI', () {
     test('get playlist', () async {
-      final playlist = await asmrApi.getPlaylists(page: 1);
+      final playlist = await api.getPlaylists(page: 1);
       printFormattedMap(playlist!);
     });
 
     // getSearchResult
     test('get search results', () async {
-      final searchResults = await asmrApi.getSearchResult(
+      final searchResults = await api.search(
         content: '柚木',
         params: {
           'page': 1,
@@ -44,13 +44,13 @@ void main() {
 
     // getWorkInfo
     test('get work info', () async {
-      final workInfo = await asmrApi.getWorkInfo(rj: 'RJ422979');
+      final workInfo = await api.getWorkInfo(id: '422979');
       printFormattedMap(workInfo!);
     });
 
     // getVoiceTracks
     test('get voice tracks', () async {
-      final voiceTracks = await asmrApi.getTracks(rj: 'RJ422979');
+      final voiceTracks = await api.getTracks(id: '422979');
       for (var voiceTrack in voiceTracks!) {
         printFormattedMap(voiceTrack);
       }

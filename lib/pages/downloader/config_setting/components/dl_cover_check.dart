@@ -14,7 +14,7 @@ class DlCoverCheck extends ConsumerWidget {
         padding: const EdgeInsets.only(left: 20.0),
         child: Row(
           children: [
-            Text('下载封面'),
+            const Text('下载封面'),
             Checkbox(
               value: dlCover,
               onChanged: (value) {

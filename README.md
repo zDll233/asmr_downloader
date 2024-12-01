@@ -6,8 +6,8 @@
 
 ## 使用方法
 
-1. **搜索RJ号**：  
-    左上搜索框输入RJ号点击搜索，或者点击右方按钮读取剪贴板并搜索。  
+1. **搜索SourceId**：  
+    左上搜索框输入SourceId点击搜索，或者点击右方按钮读取剪贴板并搜索。  
     ​![image-20241130170204-ovfg0zi](screenshots/image-20241130170204-ovfg0zi.png)​
 2. **选择下载任务进行下载：**   
     ​![image-20241130170442-90pyvwo](screenshots/image-20241130170442-90pyvwo.png)​

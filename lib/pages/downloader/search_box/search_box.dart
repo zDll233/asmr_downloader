@@ -36,7 +36,7 @@ class SearchBoxState extends ConsumerState<SearchBox> {
                 controller: _controller,
                 cursorColor: _color,
                 decoration: InputDecoration(
-                  hintText: '输入RJ号',
+                  hintText: '输入sourceId',
                   border: OutlineInputBorder(),
                   focusedBorder:
                       OutlineInputBorder(borderSide: BorderSide(color: _color)),
@@ -69,10 +69,10 @@ class SearchBoxState extends ConsumerState<SearchBox> {
                   onPressed: dlStatus == DownloadStatus.downloading
                       ? null
                       : () async {
-                          final newRj = await UIService(ref).pasteAndSearch();
-                          if (newRj != null) {
-                            _controller.text = newRj;
-                            _inputText = newRj;
+                          final newSearchText = await UIService(ref).pasteAndSearch();
+                          if (newSearchText != null) {
+                            _controller.text = newSearchText;
+                            _inputText = newSearchText;
                           }
                         },
                   icon: Icon(Icons.content_paste_go),

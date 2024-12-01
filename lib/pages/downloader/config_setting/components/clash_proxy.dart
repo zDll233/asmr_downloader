@@ -14,7 +14,7 @@ class ClashProxy extends ConsumerWidget {
         padding: const EdgeInsets.only(left: 20.0),
         child: Row(
           children: [
-            Text('clash代理'),
+            const Text('clash代理'),
             Checkbox(
               value: clashProxy != 'DIRECT',
               onChanged: (value) {

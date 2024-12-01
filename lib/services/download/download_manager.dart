@@ -24,10 +24,15 @@ class DownloadManager {
     await UIService(ref).resetProgress();
     ref.read(dlStatusProvider.notifier).state = DownloadStatus.downloading;
 
-    final rj = ref.read(rjProvider);
+    final sourceId = ref.read(sourceIdProvider);
+    if (sourceId == null) {
+      Log.fatal('Download failed\n' 'error: sourId is null');
+      return;
+    }
+
     final targetDirPath = ref.read(targetDirPathProvider);
     if (targetDirPath == '-') {
-      Log.warning('Download failed: $rj\n'
+      Log.warning('Download failed: $sourceId\n'
           'error: Target download path is empty, which means you have to start downloading after work info is loaded');
     } else {
       ref.read(currentDlNoProvider.notifier).state = 0;
@@ -36,7 +41,7 @@ class DownloadManager {
       int rootFolderTaskCnt = 0;
       final rootFolderSnapshot = ref.read(rootFolderProvider)?.copyWith();
       if (rootFolderSnapshot == null) {
-        Log.fatal('Download failed: $rj\n' 'error: rootFolder is null');
+        Log.fatal('Download failed: $sourceId\n' 'error: rootFolder is null');
       } else {
         rootFolderTaskCnt = countTotalTask(rootFolderSnapshot);
         ref.read(totalTaskCntProvider.notifier).state = rootFolderTaskCnt;
@@ -45,7 +50,7 @@ class DownloadManager {
       // download cover
       if (ref.read(dlCoverProvider)) {
         ref.read(totalTaskCntProvider.notifier).state++;
-        await _downloadCover(rj, p.join(targetDirPath, rj));
+        await _downloadCover(sourceId, p.join(targetDirPath, sourceId));
       }
 
       // download root folder
@@ -75,24 +80,24 @@ class DownloadManager {
   }
 
   /// 下载cover
-  Future<void> _downloadCover(String rj, String rjDirPath) async {
+  Future<void> _downloadCover(String sourceId, String sourceIdDirPath) async {
     final coverUrl = ref.read(coverUrlProvider);
     final int? coverSize = await _api.tryGetContentLength(coverUrl);
 
     if (coverSize != null) {
       FileAsset coverFile = FileAsset(
-        id: '${rj}_cover',
+        id: '${sourceId}_cover',
         type: 'image',
-        title: '${rj}_cover.jpg',
+        title: '${sourceId}_cover.jpg',
         mediaStreamUrl: coverUrl,
         mediaDownloadUrl: coverUrl,
         size: coverSize,
-        savePath: p.join(rjDirPath, '${rj}_cover.jpg'),
+        savePath: p.join(sourceIdDirPath, '${sourceId}_cover.jpg'),
       )..selected = true;
 
-      await _downloadTrackItem(coverFile, rjDirPath);
+      await _downloadTrackItem(coverFile, sourceIdDirPath);
     } else {
-      Log.error('Download cover failed: ${rj}_cover.jpg\n'
+      Log.error('Download cover failed: ${sourceId}_cover.jpg\n'
           'error: cover size is null');
     }
   }

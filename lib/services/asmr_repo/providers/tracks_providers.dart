@@ -5,11 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final rawTracksProvider = FutureProvider<List<dynamic>?>((ref) async {
   final api = ref.watch(asmrApiProvider);
-  final rj = ref.watch(rjProvider);
 
-  if (rj.isEmpty) {
-    return Future.value(null);
+  final id = ref.watch(idProvider);
+  if (id == null) {
+    return null;
   }
-  Log.info('fetch tracks: "$rj"');
-  return api.getTracks(rj: rj);
+
+  Log.info('Fetch tracks: "$id"');
+  return api.getTracks(id: id);
 });

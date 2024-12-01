@@ -5,8 +5,6 @@ import 'package:asmr_downloader/utils/log.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 
-typedef RemoteSourceID = String;
-
 class AsmrApi {
   String _baseApiUrl = 'https://api.asmr-200.com/api/';
 
@@ -240,7 +238,7 @@ class AsmrApi {
 
   /// Adds works to a playlist.
   Future<Map<String, dynamic>?> addWorksToPlaylist({
-    required List<RemoteSourceID> sourceIds,
+    required List<String> sourceIds,
     required String plId,
   }) async {
     return await post('playlist/add-works-to-playlist', data: {
@@ -259,11 +257,12 @@ class AsmrApi {
   }
 
   /// Searches for content.
-  Future<Map<String, dynamic>?> getSearchResult({
+  Future<Map<String, dynamic>?> search({
     required String content,
-    required Map<String, dynamic> params,
+    Map<String, dynamic>? params,
+    int maxTry = 3,
   }) async {
-    return await get('search/$content', params: params);
+    return await get('search/$content', params: params, maxTry: maxTry);
   }
 
   /// Lists works based on parameters.
@@ -278,7 +277,7 @@ class AsmrApi {
     required String tagName,
     required Map<String, dynamic> params,
   }) async {
-    return await getSearchResult(
+    return await search(
       content: '\$tag:$tagName\$',
       params: params,
     );
@@ -289,23 +288,17 @@ class AsmrApi {
     required String vaName,
     required Map<String, dynamic> params,
   }) async {
-    return await getSearchResult(
+    return await search(
       content: '\$va:$vaName\$',
       params: params,
     );
   }
 
-  Future<Map<String, dynamic>?> getWorkInfo({
-    required RemoteSourceID rj,
-  }) async {
-    final id = rj.replaceAll(RegExp(r'[^0-9]'), '');
+  Future<Map<String, dynamic>?> getWorkInfo({required String id}) async {
     return await get('work/$id');
   }
 
-  Future<List<dynamic>?> getTracks({
-    required RemoteSourceID rj,
-  }) async {
-    final id = rj.replaceAll(RegExp(r'[^0-9]'), '');
+  Future<List<dynamic>?> getTracks({required String id}) async {
     return await get('tracks/$id');
   }
 }
