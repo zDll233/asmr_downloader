@@ -1,6 +1,5 @@
 import 'package:asmr_downloader/models/track_item.dart';
 import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/middle_ellipsis_text.dart';
-import 'package:asmr_downloader/services/download/download_manager.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,7 +20,8 @@ class DownloadProcess extends StatelessWidget {
                 ref.watch(dlStatusProvider) == DownloadStatus.downloading;
             return TextButton(
               style: TextButton.styleFrom(backgroundColor: Colors.pink[200]),
-              onPressed: downloading ? null : DownloadManager(ref: ref).run,
+              onPressed:
+                  downloading ? null : ref.read(downloadManagerProvider).run,
               child: Text(downloading ? '下载中' : '下载',
                   style: TextStyle(color: Colors.white70)),
             );

@@ -4,11 +4,14 @@ import 'package:asmr_downloader/services/asmr_repo/parse_tracks.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/tracks_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
+import 'package:asmr_downloader/services/download/download_manager.dart';
 import 'package:asmr_downloader/utils/legal_windows_name.dart';
 import 'package:asmr_downloader/utils/log.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:path/path.dart' as p;
+
+final downloadManagerProvider = Provider((ref) => DownloadManager(ref));
 
 final targetDirPathProvider = Provider<String>((ref) {
   final downloadPath = ref.watch(downloadPathProvider);
@@ -22,8 +25,7 @@ final targetDirPathProvider = Provider<String>((ref) {
 
 final searchTextProvider = StateProvider<String?>((ref) => null);
 
-final searchResultProvider =
-    FutureProvider<Map<String, dynamic>?>((ref) async {
+final searchResultProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   final searchText = ref.watch(searchTextProvider);
   if (searchText == null || searchText.startsWith('RJ')) {
     return null;

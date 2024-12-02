@@ -1,6 +1,6 @@
 import 'package:asmr_downloader/models/track_item.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
-import 'package:asmr_downloader/services/ui/ui_service.dart';
+import 'package:asmr_downloader/services/ui/ui_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -56,7 +56,7 @@ class SearchBoxState extends ConsumerState<SearchBox> {
                   return IconButton(
                     onPressed: dlStatus == DownloadStatus.downloading
                         ? null
-                        : () => UIService(ref).search(_inputText),
+                        : () => ref.read(uiServiceProvider).search(_inputText),
                     icon: Icon(Icons.search),
                   );
                 },
@@ -69,7 +69,9 @@ class SearchBoxState extends ConsumerState<SearchBox> {
                   onPressed: dlStatus == DownloadStatus.downloading
                       ? null
                       : () async {
-                          final newSearchText = await UIService(ref).pasteAndSearch();
+                          final newSearchText = await ref
+                              .read(uiServiceProvider)
+                              .pasteAndSearch();
                           if (newSearchText != null) {
                             _controller.text = newSearchText;
                             _inputText = newSearchText;

@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:windows_taskbar/windows_taskbar.dart';
 
 class UIService {
-  WidgetRef ref;
+  final Ref ref;
   UIService(this.ref);
 
   Future<void> resetProgress() async {

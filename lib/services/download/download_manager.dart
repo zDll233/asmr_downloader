@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:asmr_downloader/common/config_providers.dart';
-import 'package:asmr_downloader/services/asmr_repo/asmr_api.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
@@ -16,9 +15,8 @@ import 'package:windows_taskbar/windows_taskbar.dart';
 import 'package:path/path.dart' as p;
 
 class DownloadManager {
-  final WidgetRef ref;
-  late final AsmrApi _api;
-  DownloadManager({required this.ref}) : _api = ref.read(asmrApiProvider);
+  final Ref ref;
+  DownloadManager(this.ref);
 
   Future<void> run() async {
     await UIService(ref).resetProgress();
@@ -82,7 +80,8 @@ class DownloadManager {
   /// 下载cover
   Future<void> _downloadCover(String sourceId, String sourceIdDirPath) async {
     final coverUrl = ref.read(coverUrlProvider);
-    final int? coverSize = await _api.tryGetContentLength(coverUrl);
+    final int? coverSize =
+        await ref.read(asmrApiProvider).tryGetContentLength(coverUrl);
 
     if (coverSize != null) {
       FileAsset coverFile = FileAsset(
@@ -200,19 +199,19 @@ class DownloadManager {
             Log.info('Start downloading: $fileName\n'
                 'URL: $urlPath\n'
                 'Save path: $savePath');
-            await _api.download(
-              urlPath,
-              savePath,
-              cancelToken: cancelToken,
-              deleteOnError: false,
-              onReceiveProgress: onReceiveProgress,
-            );
+            await ref.read(asmrApiProvider).download(
+                  urlPath,
+                  savePath,
+                  cancelToken: cancelToken,
+                  deleteOnError: false,
+                  onReceiveProgress: onReceiveProgress,
+                );
           } else {
             Log.info('Resume downloading: $fileName\n'
                 'downloadedBytes: $downloadedBytes, fileSize: $fileSize\n'
                 'URL: $urlPath\n'
                 'Save path: $savePath');
-            await _api.download(
+            await ref.read(asmrApiProvider).download(
               urlPath,
               tmpSavePath,
               cancelToken: cancelToken,
