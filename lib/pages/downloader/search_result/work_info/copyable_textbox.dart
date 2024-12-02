@@ -3,17 +3,19 @@ import 'package:flutter/services.dart';
 
 class CopyableTextBox extends StatelessWidget {
   final String text;
+  final TextStyle? textStyle;
   final Color backgroundColor;
   final double borderRadius;
-
-  final TextStyle? textStyle;
+  final EdgeInsetsGeometry padding;
 
   const CopyableTextBox({
     super.key,
     required this.text,
+    this.textStyle,
     this.backgroundColor = Colors.transparent,
     this.borderRadius = 5.0,
-    this.textStyle,
+    this.padding =
+        const EdgeInsets.only(left: 7.0, right: 7.0, top: 2.0, bottom: 2.0),
   });
 
   @override
@@ -22,19 +24,15 @@ class CopyableTextBox extends StatelessWidget {
       onTap: () async {
         await Clipboard.setData(ClipboardData(text: text));
       },
-      child: Padding(
-        padding: EdgeInsets.all(3.0),
-        child: Tooltip(
-          message: '复制到剪贴板',
-          child: Container(
-            padding:
-                EdgeInsets.only(left: 5.0, right: 5.0, top: 2.0, bottom: 2.0),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(borderRadius),
-            ),
-            child: Text(text, style: textStyle),
+      child: Tooltip(
+        message: '复制',
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(borderRadius),
           ),
+          child: Text(text, style: textStyle),
         ),
       ),
     );

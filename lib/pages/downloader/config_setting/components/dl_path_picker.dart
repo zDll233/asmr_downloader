@@ -1,6 +1,5 @@
 import 'package:asmr_downloader/common/config_providers.dart';
-import 'package:asmr_downloader/utils/log.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:asmr_downloader/services/ui/ui_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,16 +33,7 @@ class DownloadPathPicker extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(left: 5.0),
               child: IconButton(
-                onPressed: () async {
-                  final dlPath = await FilePicker.platform.getDirectoryPath();
-                  if (dlPath == null) {
-                    return;
-                  }
-                  ref.read(downloadPathProvider.notifier).state = dlPath;
-                  ref.read(configFileProvider).addOrUpdate({'dlPath': dlPath});
-
-                  Log.info('dlPath: $dlPath');
-                },
+                onPressed: ref.read(uiServiceProvider).pickDlPath,
                 icon: const Icon(Icons.folder),
               ),
             ),

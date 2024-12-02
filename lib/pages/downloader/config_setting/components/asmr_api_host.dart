@@ -1,12 +1,16 @@
-import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
 import 'package:asmr_downloader/common/config_providers.dart';
+import 'package:asmr_downloader/services/ui/ui_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AsmrApiHost extends ConsumerWidget {
-  AsmrApiHost({super.key});
+  const AsmrApiHost({super.key});
 
-  final List<String> _dropdownItems = ['asmr-100', 'asmr-200', 'asmr-300'];
+  static const List<String> _dropdownItems = [
+    'asmr-100',
+    'asmr-200',
+    'asmr-300'
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,12 +27,7 @@ class AsmrApiHost extends ConsumerWidget {
               child: Text(value),
             );
           }).toList(),
-          onChanged: (String? newValue) {
-            if (newValue == null) return;
-            ref.read(apiHostProvider.notifier).state = newValue;
-            ref.read(configFileProvider).addOrUpdate({'apiHost': newValue});
-            ref.read(asmrApiProvider).setApiHost(newValue);
-          },
+          onChanged: ref.read(uiServiceProvider).onApiHostChoosed,
         ),
       ),
     );

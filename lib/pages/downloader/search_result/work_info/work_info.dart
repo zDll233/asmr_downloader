@@ -22,46 +22,109 @@ class WorkInfo extends ConsumerWidget {
             if (data == null) {
               return const Text('No work info');
             }
-
-            final title = ref.read(titleProvider);
-            final cvLs = ref.read(cvLsProvider);
-            final coverUrl = ref.read(coverUrlProvider);
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FadeInImage(
-                  placeholder: MemoryImage(kTransparentImage),
-                  image: NetworkImage(coverUrl),
-                  imageErrorBuilder: (context, error, stackTrace) {
-                    Log.error('Failed to load cover image\n'
-                        'cover url: $coverUrl'
-                        'error: $error\n');
-                    return const Icon(Icons.error, color: Colors.red);
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                  child: CopyableTextBox(
-                      text: title,
-                      textStyle: Theme.of(context).textTheme.bodyLarge),
-                ),
-                Wrap(
-                  alignment: WrapAlignment.start,
-                  spacing: 8.0,
+            return ScrollConfiguration(
+              behavior:
+                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ...cvLs.map((e) => CopyableTextBox(
-                          text: e,
-                          backgroundColor: Color.fromRGBO(50, 150, 136, 1),
-                        ))
+                    _cover(ref.read(coverUrlProvider)),
+                    _title(ref.read(titleProvider), context),
+                    _miscInfo(
+                      ref.read(releaseDateProvider),
+                      ref.read(dlCountProvider),
+                    ),
+                    _tag(ref.read(tagLsProvider)),
+                    _cv(ref.read(cvLsProvider)),
                   ],
                 ),
-              ],
+              ),
             );
           },
           loading: () => Center(child: const CircularProgressIndicator()),
           error: (error, stack) => Text('Error: $error'),
         ),
+      ),
+    );
+  }
+
+  FadeInImage _cover(String coverUrl) {
+    return FadeInImage.memoryNetwork(
+      placeholder: kTransparentImage,
+      image: coverUrl,
+      imageErrorBuilder: (context, error, stackTrace) {
+        Log.error('Failed to load cover image\n'
+            'cover url: $coverUrl'
+            'error: $error\n');
+        return const Icon(Icons.error, color: Colors.red);
+      },
+    );
+  }
+
+  static const _verticalPadding = 10.0;
+
+  Widget _title(String title, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: _verticalPadding),
+      child: CopyableTextBox(
+        text: title,
+        textStyle: Theme.of(context).textTheme.bodyLarge,
+        padding: EdgeInsets.zero,
+      ),
+    );
+  }
+
+  Widget _miscInfo(String releaseData, int dlCount) {
+    return Padding(
+      padding: const EdgeInsets.only(top: _verticalPadding),
+      child: Row(
+        children: [
+          Text(releaseData),
+          const SizedBox(width: 20.0),
+          Text('销量: $dlCount'),
+        ],
+      ),
+    );
+  }
+
+  Widget _tag(List<String> tagLsvLs) {
+    return Padding(
+      padding: const EdgeInsets.only(top: _verticalPadding),
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        spacing: 10.0,
+        children: [
+          ...tagLsvLs.map((e) => Padding(
+                padding: const EdgeInsets.only(top: 3.0, bottom: 3.0),
+                child: CopyableTextBox(
+                  text: e,
+                  textStyle: const TextStyle(color: Colors.black),
+                  backgroundColor: Color.fromRGBO(224, 224, 224, 1),
+                  borderRadius: 10.0,
+                ),
+              ))
+        ],
+      ),
+    );
+  }
+
+  Widget _cv(List<String> cvLs) {
+    return Padding(
+      padding: const EdgeInsets.only(
+          top: _verticalPadding, bottom: _verticalPadding),
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        spacing: 10.0,
+        children: [
+          ...cvLs.map((e) => Padding(
+                padding: const EdgeInsets.only(top: 3.0, bottom: 3.0),
+                child: CopyableTextBox(
+                  text: e,
+                  backgroundColor: Color.fromRGBO(50, 150, 136, 1),
+                ),
+              ))
+        ],
       ),
     );
   }
