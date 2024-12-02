@@ -1,3 +1,5 @@
+import 'package:asmr_downloader/services/asmr_repo/providers/tracks_providers.dart';
+import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/utils/source_id_util.dart';
 import 'package:flutter/services.dart';
@@ -20,27 +22,27 @@ class UIService {
     return sourceId.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
   }
 
-  Future<void> search(String inputText) async {
+  Future<String?> search(String input) async {
     await resetProgress();
 
-    final searchText = normalizeInput(inputText);
-    if (searchText.isEmpty || !isSourceIdValid(searchText)) {
-      return;
-    }
-
-    ref.read(searchTextProvider.notifier).state = searchText;
-  }
-
-  Future<String?> pasteAndSearch() async {
-    await resetProgress();
-
-    final clipBoardText = (await Clipboard.getData('text/plain'))?.text;
-    if (clipBoardText == null) {
+    final searchText = normalizeInput(input);
+    if (!isSourceIdValid(searchText)) {
       return null;
     }
 
-    final searchText = normalizeInput(clipBoardText);
-    if (searchText.isEmpty || !isSourceIdValid(searchText)) {
+    if (searchText == ref.read(searchTextProvider)) {
+      // force to refetch
+      ref.invalidate(workInfoProvider);
+      ref.invalidate(rawTracksProvider);
+    } else {
+      ref.read(searchTextProvider.notifier).state = searchText;
+    }
+    return searchText;
+  }
+
+  Future<String?> pasteAndSearch() async {
+    final clipBoardText = (await Clipboard.getData('text/plain'))?.text;
+    if (clipBoardText == null) {
       return null;
     }
 
@@ -50,7 +52,6 @@ class UIService {
       await Clipboard.setData(ClipboardData(text: oldSourceId));
     }
 
-    ref.read(searchTextProvider.notifier).state = searchText;
-    return searchText;
+    return search(clipBoardText);
   }
 }

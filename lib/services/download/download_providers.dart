@@ -22,7 +22,7 @@ final targetDirPathProvider = Provider<String>((ref) {
 
 final searchTextProvider = StateProvider<String?>((ref) => null);
 
-final idSearchResultProvider =
+final searchResultProvider =
     FutureProvider<Map<String, dynamic>?>((ref) async {
   final searchText = ref.watch(searchTextProvider);
   if (searchText == null || searchText.startsWith('RJ')) {
@@ -43,8 +43,8 @@ final idProvider = Provider<String?>((ref) {
     return searchText.replaceAll(RegExp(r'[^0-9]'), '');
   }
 
-  final idSearchResult = ref.watch(idSearchResultProvider);
-  return idSearchResult.maybeWhen(
+  final searchResult = ref.watch(searchResultProvider);
+  return searchResult.maybeWhen(
     data: (searchData) => searchData?['works'][0]['id'].toString(),
     orElse: () => null,
   );
@@ -59,8 +59,8 @@ final sourceIdProvider = Provider<String?>((ref) {
     return searchText;
   }
 
-  final idSearchResult = ref.watch(idSearchResultProvider);
-  return idSearchResult.maybeWhen(
+  final searchResult = ref.watch(searchResultProvider);
+  return searchResult.maybeWhen(
     data: (searchData) => searchData?['works'][0]['source_id'].toString(),
     orElse: () => null,
   );

@@ -3,42 +3,29 @@ import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+AsyncValue<T> combineStates<T>(
+  AsyncValue searchResult,
+  AsyncValue<T> data,
+) {
+  if (searchResult.isRefreshing || data.isRefreshing) {
+    return const AsyncLoading();
+  }
+
+  return searchResult.when(
+    data: (_) => data,
+    loading: () => const AsyncLoading(),
+    error: (error, stack) => AsyncError(error, stack),
+  );
+}
+
 final workInfoLoadingStateProvider = Provider<AsyncValue>((ref) {
-  final idSearchResultFuture = ref.watch(idSearchResultProvider);
+  final searchResultFuture = ref.watch(searchResultProvider);
   final workInfoFuture = ref.watch(workInfoProvider);
-
-  if (idSearchResultFuture is AsyncError) {
-    return AsyncError(
-        idSearchResultFuture.error!, idSearchResultFuture.stackTrace!);
-  }
-  if (workInfoFuture is AsyncError) {
-    return AsyncError(workInfoFuture.error!, workInfoFuture.stackTrace!);
-  }
-
-  if (idSearchResultFuture is AsyncLoading || workInfoFuture is AsyncLoading) {
-    return AsyncLoading();
-  }
-
-  // both AsyncData
-  return AsyncData(workInfoFuture.value);
+  return combineStates(searchResultFuture, workInfoFuture);
 });
 
 final tracksLoadingStateProvider = Provider<AsyncValue>((ref) {
-  final idSearchResultFuture = ref.watch(idSearchResultProvider);
-  final rawTracks = ref.watch(rawTracksProvider);
-
-  if (idSearchResultFuture is AsyncError) {
-    return AsyncError(
-        idSearchResultFuture.error!, idSearchResultFuture.stackTrace!);
-  }
-  if (rawTracks is AsyncError) {
-    return AsyncError(rawTracks.error!, rawTracks.stackTrace!);
-  }
-
-  if (idSearchResultFuture is AsyncLoading || rawTracks is AsyncLoading) {
-    return AsyncLoading();
-  }
-
-  // both AsyncData
-  return AsyncData(rawTracks.value);
+  final searchResultFuture = ref.watch(searchResultProvider);
+  final rawTracksFuture = ref.watch(rawTracksProvider);
+  return combineStates(searchResultFuture, rawTracksFuture);
 });
