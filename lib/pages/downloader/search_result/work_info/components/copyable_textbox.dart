@@ -21,9 +21,7 @@ class CopyableTextBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () async {
-        await Clipboard.setData(ClipboardData(text: text));
-      },
+      onTap: () async => await Clipboard.setData(ClipboardData(text: text)),
       child: Tooltip(
         message: '复制',
         child: Container(

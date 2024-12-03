@@ -1,6 +1,6 @@
-import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/download_progress.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/components/download_progress.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
-import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/tracks.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/components/tracks.dart';
 import 'package:asmr_downloader/services/ui/ui_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class TracksView extends ConsumerWidget {
   const TracksView({super.key, this.horizontalPadding = 20.0});
   final double horizontalPadding;
+
   static const _tracksLPadding = 20.0;
 
   @override
@@ -26,16 +27,13 @@ class TracksView extends ConsumerWidget {
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: _tracksLPadding, bottom: 10.0),
-                        child: DownloadProgress(appWidth: appWidth),
-                      ),
+                      DownloadProgress(tracksLPadding: _tracksLPadding),
                       Expanded(
-                          child: Tracks(
-                        rootFolder: rootFolder,
-                        tracksLPadding: _tracksLPadding,
-                      )),
+                        child: Tracks(
+                          rootFolder: rootFolder,
+                          tracksLPadding: _tracksLPadding,
+                        ),
+                      ),
                     ],
                   );
           },

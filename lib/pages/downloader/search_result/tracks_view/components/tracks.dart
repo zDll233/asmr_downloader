@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/middle_ellipsis_text.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/components/middle_ellipsis_text.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/models/track_item.dart';
 import 'package:flutter/material.dart';

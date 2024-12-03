@@ -18,11 +18,7 @@ class Downloader extends StatelessWidget {
               ConfigSettings(),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 20.0, top: 10.0, bottom: 10.0),
-            child: Text('Search Result',
-                style: Theme.of(context).textTheme.titleMedium),
-          ),
+          SizedBox(height: 20),
           SearchResult(),
         ],
       ),

@@ -1,7 +1,6 @@
-import 'package:asmr_downloader/models/track_item.dart';
 import 'package:asmr_downloader/pages/window_title_bar/caption_buttons/window_button_color_theme.dart';
 import 'package:asmr_downloader/pages/window_title_bar/caption_buttons/window_caption_button_icon.dart';
-import 'package:asmr_downloader/services/download/download_providers.dart';
+import 'package:asmr_downloader/services/ui/ui_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
@@ -154,38 +153,7 @@ class CloseBtn extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return WindowButton(
       iconName: _kIconChromeClose,
-      onPressed: () async {
-        // before close
-        final dlStatus = ref.read(dlStatusProvider);
-        if (dlStatus == DownloadStatus.downloading) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('文件下载中'),
-                content: const Text(
-                    '你确定要关闭吗？下载将被取消，再次下载会继承已下载的部分。'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      windowManager.close();
-                    },
-                    child: const Text('关闭'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('取消'),
-                  ),
-                ],
-              );
-            },
-          );
-        }else{
-          windowManager.close();
-        }
-      },
+      onPressed: () => ref.read(uiServiceProvider).onExit(context),
       buttonBgColorScheme: _closeButtonBgColorScheme,
       buttonIconColorScheme: _closeButtonIconColorScheme,
       minWidth: minWidth,

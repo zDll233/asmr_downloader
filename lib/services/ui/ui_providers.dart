@@ -6,20 +6,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final uiServiceProvider = Provider((ref) => UIService(ref));
 
-AsyncValue combineStates(AsyncValue asyncValue1, AsyncValue asyncValue2) {
-  if (asyncValue1.isRefreshing || asyncValue2.isRefreshing) {
+AsyncValue combineStates(AsyncValue precondition, AsyncValue data) {
+  if (precondition.isRefreshing || data.isRefreshing) {
     return const AsyncLoading();
   }
-  return asyncValue1.when(
-    data: (_) => asyncValue2,
+  return precondition.when(
+    data: (_) => data,
     loading: () => const AsyncLoading(),
     error: (error, stack) => AsyncError(error, stack),
   );
 }
 
-final workInfoLoadingStateProvider = Provider<AsyncValue>((ref) =>
-    combineStates(
-        ref.watch(searchResultProvider), ref.watch(workInfoProvider)));
+final workInfoLoadingStateProvider = Provider<AsyncValue>(
+  (ref) => combineStates(
+    ref.watch(searchResultProvider),
+    ref.watch(workInfoProvider),
+  ),
+);
 
-final tracksLoadingStateProvider = Provider<AsyncValue>((ref) => combineStates(
-    ref.watch(workInfoLoadingStateProvider), ref.watch(rawTracksProvider)));
+final tracksLoadingStateProvider = Provider<AsyncValue>(
+  (ref) => combineStates(
+    ref.watch(workInfoLoadingStateProvider),
+    ref.watch(rawTracksProvider),
+  ),
+);

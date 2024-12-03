@@ -1,4 +1,5 @@
 import 'package:asmr_downloader/common/config_providers.dart';
+import 'package:asmr_downloader/models/track_item.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/tracks_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
@@ -6,8 +7,10 @@ import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/utils/log.dart';
 import 'package:asmr_downloader/utils/source_id_util.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:windows_taskbar/windows_taskbar.dart';
 
 class UIService {
@@ -94,5 +97,31 @@ class UIService {
     ref.read(downloadPathProvider.notifier).state = dlPath;
     ref.read(configFileProvider).addOrUpdate({'dlPath': dlPath});
     Log.info('dlPath: $dlPath');
+  }
+
+  void onExit(BuildContext context) {
+    if (DownloadStatus.downloading == ref.read(dlStatusProvider)) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('文件下载中'),
+            content: const Text('你确定要关闭吗？下载将被取消，再次下载会继承已下载的部分。'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => windowManager.close(),
+                child: const Text('关闭'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('取消'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      windowManager.close();
+    }
   }
 }

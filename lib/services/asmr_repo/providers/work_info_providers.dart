@@ -30,6 +30,19 @@ final titleProvider = Provider<String>((ref) {
   );
 });
 
+final circleNameProvider = Provider<String>((ref) {
+  final workInfo = ref.watch(workInfoProvider);
+  return workInfo.maybeWhen(
+    data: (data) {
+      if (data == null) {
+        return '';
+      }
+      return data['circle']['name'].toString();
+    },
+    orElse: () => '',
+  );
+});
+
 final cvLsProvider = Provider<List<String>>((ref) {
   final workInfo = ref.watch(workInfoProvider);
   return workInfo.maybeWhen(

@@ -1,26 +1,29 @@
 import 'package:asmr_downloader/models/track_item.dart';
-import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/middle_ellipsis_text.dart';
+import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/components/middle_ellipsis_text.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class DownloadProgress extends StatelessWidget {
-  const DownloadProgress({super.key, required this.appWidth});
-
-  final double appWidth;
+  const DownloadProgress({super.key, required this.tracksLPadding});
+  final double tracksLPadding;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _downloadButton(),
-        SizedBox(width: appWidth * 0.01),
-        _progressBar(appWidth),
-        SizedBox(width: appWidth * 0.01),
-        _progressPercentage(),
-        Spacer(),
-        _totalDlCount(appWidth),
-      ],
+    final appWidth = MediaQuery.of(context).size.width;
+    return Padding(
+      padding: EdgeInsets.only(left: tracksLPadding, bottom: 10.0),
+      child: Row(
+        children: [
+          _downloadButton(),
+          SizedBox(width: appWidth * 0.01),
+          _progressBar(appWidth),
+          SizedBox(width: appWidth * 0.01),
+          _progressPercentage(),
+          Spacer(),
+          _totalDlCount(appWidth),
+        ],
+      ),
     );
   }
 
