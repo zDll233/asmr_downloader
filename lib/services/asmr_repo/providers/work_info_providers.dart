@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
 import 'package:asmr_downloader/utils/log.dart';
@@ -11,7 +13,7 @@ final workInfoProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
     return null;
   }
 
-  Log.info('Fetch workInfo: "$id"');
+  Log.info('Fetch workInfo. id: $id');
   return api.getWorkInfo(id: id);
 });
 
@@ -54,6 +56,17 @@ final coverUrlProvider = Provider<String>((ref) {
   );
 });
 
+final coverBytesProvider = FutureProvider<Uint8List?>((ref) async {
+  final api = ref.watch(asmrApiProvider);
+  final id = ref.watch(idProvider);
+  if (id == null) {
+    return null;
+  }
+
+  Log.info('Fetch cover bytes. id: $id');
+  return api.getCoverBytes(id: id);
+});
+
 final tagLsProvider = Provider<List<String>>((ref) {
   final workInfo = ref.watch(workInfoProvider);
   return workInfo.maybeWhen(
@@ -61,7 +74,9 @@ final tagLsProvider = Provider<List<String>>((ref) {
       if (data == null) {
         return [];
       }
-      return (data['tags'] as List).map((e) => e['name'].toString()).toList();
+      return (data['tags'] as List)
+          .map((e) => e['i18n']['zh-cn']['name'].toString())
+          .toList();
     },
     orElse: () => [],
   );

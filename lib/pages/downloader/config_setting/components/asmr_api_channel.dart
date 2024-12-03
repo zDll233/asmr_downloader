@@ -3,8 +3,8 @@ import 'package:asmr_downloader/services/ui/ui_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AsmrApiHost extends ConsumerWidget {
-  const AsmrApiHost({super.key});
+class AsmrApiChannel extends ConsumerWidget {
+  const AsmrApiChannel({super.key});
 
   static const List<String> _dropdownItems = [
     'asmr-100',
@@ -14,12 +14,12 @@ class AsmrApiHost extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final apiHost = ref.watch(apiHostProvider);
+    final apiChannel = ref.watch(apiChannelProvider);
     return SizedBox(
       child: Padding(
         padding: const EdgeInsets.only(left: 20.0),
         child: DropdownButton<String>(
-          value: apiHost,
+          value: apiChannel,
           focusColor: Colors.transparent,
           items: _dropdownItems.map((String value) {
             return DropdownMenuItem<String>(
@@ -27,7 +27,7 @@ class AsmrApiHost extends ConsumerWidget {
               child: Text(value),
             );
           }).toList(),
-          onChanged: ref.read(uiServiceProvider).onApiHostChoosed,
+          onChanged: ref.read(uiServiceProvider).onApiChannelChoosed,
         ),
       ),
     );

@@ -19,12 +19,11 @@ void main() {
   setUpAll(() async {
     Log.debug('set up');
     api = AsmrApi();
-
-    // await asmrApi.login();
   });
 
   group('AsmrAPI', () {
     test('get playlist', () async {
+      await api.login('user123456t', '123456');
       final playlist = await api.getPlaylists(page: 1);
       printFormattedMap(playlist!);
     });

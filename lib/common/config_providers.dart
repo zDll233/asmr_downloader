@@ -11,4 +11,4 @@ final dlCoverProvider = StateProvider<bool>((ref) => false);
 
 final clashProxyProvider = StateProvider<String>((ref) => 'DIRECT');
 
-final apiHostProvider = StateProvider<String>((ref) => 'asmr-200');
+final apiChannelProvider = StateProvider<String>((ref) => 'asmr-200');

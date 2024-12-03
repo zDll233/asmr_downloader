@@ -11,6 +11,6 @@ final rawTracksProvider = FutureProvider<List<dynamic>?>((ref) async {
     return null;
   }
 
-  Log.info('Fetch tracks: "$id"');
+  Log.info('Fetch tracks. id: $id');
   return api.getTracks(id: id);
 });

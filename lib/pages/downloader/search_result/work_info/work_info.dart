@@ -7,7 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class WorkInfo extends ConsumerWidget {
-  const WorkInfo({super.key});
+  const WorkInfo({super.key, this.horizontalPadding = 20.0});
+  final double horizontalPadding;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -16,7 +17,8 @@ class WorkInfo extends ConsumerWidget {
     return SizedBox(
       width: appWidth * 0.4,
       child: Padding(
-        padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
+        padding:
+            EdgeInsets.only(left: horizontalPadding, right: horizontalPadding),
         child: workInfoLoadingState.when(
           data: (data) {
             if (data == null) {
@@ -49,15 +51,27 @@ class WorkInfo extends ConsumerWidget {
     );
   }
 
-  FadeInImage _cover(String coverUrl) {
-    return FadeInImage.memoryNetwork(
-      placeholder: kTransparentImage,
-      image: coverUrl,
-      imageErrorBuilder: (context, error, stackTrace) {
-        Log.error('Failed to load cover image\n'
-            'cover url: $coverUrl'
-            'error: $error\n');
-        return const Icon(Icons.error, color: Colors.red);
+  Widget _cover(String coverUrl) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final coverBytes = ref.watch(coverBytesProvider);
+        return coverBytes.when(
+          data: (bytes) {
+            if (bytes == null) {
+              return const Icon(Icons.error, color: Colors.red);
+            }
+            return FadeInImage(
+                placeholder: MemoryImage(kTransparentImage),
+                image: MemoryImage(bytes));
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (error, stack) {
+            Log.error('Load cover image failed\n'
+                'cover url: $coverUrl\n'
+                'error: $error');
+            return const Icon(Icons.error, color: Colors.red);
+          },
+        );
       },
     );
   }

@@ -1,17 +1,18 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:asmr_downloader/utils/log.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 
 class AsmrApi {
-  String _baseApiUrl = 'https://api.asmr-200.com/api/';
+  String _baseApiUrl = '';
 
   final Map<String, dynamic> _headers = {
     'Referer': 'https://www.asmr.one/',
     'Origin': 'https://www.asmr.one',
-    'Host': 'api.asmr-200.com',
+    'Host': '',
     'Connection': 'keep-alive',
     'Sec-Fetch-Mode': 'cors',
     'Sec-Fetch-Site': 'cross-site',
@@ -36,19 +37,6 @@ class AsmrApi {
     Log.info('Proxy set to: $proxy');
   }
 
-  AsmrApi() {
-    _apiDio = Dio(BaseOptions(
-      connectTimeout: Duration(seconds: 5),
-      receiveTimeout: Duration(seconds: 10),
-      sendTimeout: Duration(seconds: 10),
-    ));
-    _dlDio = Dio(BaseOptions(
-      connectTimeout: Duration(seconds: 5),
-      receiveTimeout: Duration(seconds: 10),
-      sendTimeout: Duration(seconds: 10),
-    ));
-  }
-
   void _setUpProxy(Dio dioCliecnt, String proxy) {
     dioCliecnt.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
@@ -59,15 +47,34 @@ class AsmrApi {
     );
   }
 
-  void setApiHost(String host) {
-    host = 'api.$host.com';
+  AsmrApi({
+    String initialProxy = 'DIRECT',
+    String initialApiChannel = 'asmr-200',
+  }) {
+    _apiDio = Dio(BaseOptions(
+      connectTimeout: Duration(seconds: 5),
+      receiveTimeout: Duration(seconds: 10),
+      sendTimeout: Duration(seconds: 10),
+    ));
+    _dlDio = Dio(BaseOptions(
+      connectTimeout: Duration(seconds: 5),
+      receiveTimeout: Duration(seconds: 10),
+      sendTimeout: Duration(seconds: 10),
+    ));
+
+    proxy = initialProxy;
+    setApiChannel(initialApiChannel);
+  }
+
+  void setApiChannel(String apiChannel) {
+    final host = 'api.$apiChannel.com';
     _baseApiUrl = 'https://$host/api/';
     _headers['Host'] = host;
     _apiDio.options
       ..baseUrl = _baseApiUrl
       ..headers = _headers;
 
-    Log.info('Host set to: $host\nAPI URL set to: $_baseApiUrl');
+    Log.info('Api channel set to: $apiChannel\n' 'baseUrl: $_baseApiUrl');
   }
 
   /// Logs in the user and updates the authorization header.
@@ -94,20 +101,31 @@ class AsmrApi {
     }
   }
 
-  /// Generic [GET] request with retry logic.
-  Future<dynamic> get(String route,
-      {Map<String, dynamic>? params, int maxTry = 3}) async {
+  /// [GET] request with retry logic, returns null if failed after `maxTry` tries.
+  Future<Response<T>?> get<T>(
+    String route, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+    void Function(int, int)? onReceiveProgress,
+    int maxTry = 3,
+  }) async {
     int tryCount = 0;
-    Response? response;
+    Response<T>? response;
     while (tryCount < maxTry && response == null) {
       try {
         tryCount++;
-        response = await _apiDio.get(
+        response = await _apiDio.get<T>(
           route,
-          queryParameters: params,
+          data: data,
+          queryParameters: queryParameters,
+          options: options,
+          cancelToken: cancelToken,
+          onReceiveProgress: onReceiveProgress,
         );
         Log.info('[GET] request to "$route" successfully');
-        return response.data;
+        return response;
       } catch (e) {
         Log.warning('[GET] request to "$route" failed\n'
             'Current try: $tryCount\n'
@@ -119,20 +137,33 @@ class AsmrApi {
     return null;
   }
 
-  /// Generic [POST] request with retry logic.
-  Future<dynamic> post(String route,
-      {Map<String, dynamic>? data, int maxTry = 3}) async {
+  /// [POST] request with retry logic, returns null if failed after `maxTry` tries.
+  Future<Response<T>?> post<T>(
+    String route, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+    void Function(int, int)? onSendProgress,
+    void Function(int, int)? onReceiveProgress,
+    int maxTry = 3,
+  }) async {
     int tryCount = 0;
-    Response? response;
+    Response<T>? response;
     while (tryCount < maxTry && response == null) {
       try {
         tryCount++;
-        response = await _apiDio.post(
+        response = await _apiDio.post<T>(
           route,
           data: data,
+          queryParameters: queryParameters,
+          options: options,
+          cancelToken: cancelToken,
+          onSendProgress: onSendProgress,
+          onReceiveProgress: onReceiveProgress,
         );
-        Log.info('[[POST]] request to "$route" successfully');
-        return response.data;
+        Log.info('[POST] request to "$route" successfully');
+        return response;
       } catch (e) {
         Log.warning('[POST] request to "$route" failed\n'
             'Current try: $tryCount\n'
@@ -140,7 +171,41 @@ class AsmrApi {
         await Future.delayed(Duration(seconds: 3));
       }
     }
-    Log.error('Post request to "$route" failed after $maxTry tries');
+    Log.error('[POST] request to "$route" failed after $maxTry tries');
+    return null;
+  }
+
+  /// [HEAD] request with retry logic, returns null if failed after `maxTry` tries.
+  Future<Response<T>?> head<T>(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+    int maxTry = 3,
+  }) async {
+    int tryCount = 0;
+    Response<T>? response;
+    while (tryCount < maxTry && response == null) {
+      try {
+        tryCount++;
+        response = await _apiDio.head<T>(
+          path,
+          data: data,
+          queryParameters: queryParameters,
+          options: options,
+          cancelToken: cancelToken,
+        );
+        Log.info('[HEAD] request to "$path" successfully');
+        return response;
+      } catch (e) {
+        Log.warning('[HEAD] request to "$path" failed\n'
+            'Current try: $tryCount\n'
+            'error: $e');
+        await Future.delayed(Duration(seconds: 3));
+      }
+    }
+    Log.error('[HEAD] request to "$path" failed after $maxTry tries');
     return null;
   }
 
@@ -168,44 +233,20 @@ class AsmrApi {
     );
   }
 
-  Future<Response<T>> head<T>(
-    String path, {
-    Object? data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-  }) {
-    return _apiDio.head(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-      cancelToken: cancelToken,
-    );
-  }
-
-  Future<int?> tryGetContentLength(String urlPath, {int maxTry = 3}) async {
-    int tryCount = 0;
-    Response? response;
-    while (tryCount < maxTry && response == null) {
-      try {
-        tryCount++;
-        response = await head(urlPath);
-        return int.parse(response.headers.value('content-length')!);
-      } catch (e) {
-        Log.warning('Get content-length failed\n'
-            'Current try: $tryCount\n'
-            'error: $e\n');
-        await Future.delayed(Duration(seconds: 3));
-      }
+  Future<int?> tryGetContentLength(String urlPath) async {
+    try {
+      final response = await head(urlPath);
+      return int.parse(response!.headers.value('content-length')!);
+    } catch (e) {
+      Log.error('Get content-length failed\n' 'URL: $urlPath\n' 'error: $e');
+      return null;
     }
-    Log.error('Get content-length failed\n' 'URL: $urlPath');
-    return null;
   }
 
   /// Retrieves the user's profile.
   Future<Map<String, dynamic>?> getProfile() async {
-    return await get('auth/me');
+    final response = await get<Map<String, dynamic>>('auth/me');
+    return response?.data;
   }
 
   /// Retrieves playlists with pagination and filtering.
@@ -214,11 +255,13 @@ class AsmrApi {
     int pageSize = 12,
     String filterBy = 'all',
   }) async {
-    return await get('playlist/get-playlists', params: {
-      'page': page,
-      'pageSize': pageSize,
-      'filterBy': filterBy,
-    });
+    final response = await get<Map<String, dynamic>>('playlist/get-playlists',
+        queryParameters: {
+          'page': page,
+          'pageSize': pageSize,
+          'filterBy': filterBy,
+        });
+    return response?.data;
   }
 
   /// Creates a new playlist.
@@ -227,13 +270,15 @@ class AsmrApi {
     String? description,
     int privacy = 0,
   }) async {
-    return await post('playlist/create-playlist', data: {
+    final response =
+        await post<Map<String, dynamic>>('playlist/create-playlist', data: {
       'name': name,
       'description': description ?? '',
       'privacy': privacy,
       'locale': 'zh-CN',
       'works': [],
     });
+    return response?.data;
   }
 
   /// Adds works to a playlist.
@@ -241,19 +286,24 @@ class AsmrApi {
     required List<String> sourceIds,
     required String plId,
   }) async {
-    return await post('playlist/add-works-to-playlist', data: {
-      'id': plId,
-      'works': sourceIds,
-    });
+    final response = await post<Map<String, dynamic>>(
+        'playlist/add-works-to-playlist',
+        data: {
+          'id': plId,
+          'works': sourceIds,
+        });
+    return response?.data;
   }
 
   /// Deletes a playlist.
   Future<Map<String, dynamic>?> deletePlaylist({
     required String plId,
   }) async {
-    return await post('playlist/delete-playlist', data: {
+    final response =
+        await post<Map<String, dynamic>>('playlist/delete-playlist', data: {
       'id': plId,
     });
+    return response?.data;
   }
 
   /// Searches for content.
@@ -262,14 +312,18 @@ class AsmrApi {
     Map<String, dynamic>? params,
     int maxTry = 3,
   }) async {
-    return await get('search/$content', params: params, maxTry: maxTry);
+    final response = await get<Map<String, dynamic>>('search/$content',
+        queryParameters: params, maxTry: maxTry);
+    return response?.data;
   }
 
   /// Lists works based on parameters.
   Future<Map<String, dynamic>?> listWorks({
     required Map<String, dynamic> params,
   }) async {
-    return await get('works', params: params);
+    final response =
+        await get<Map<String, dynamic>>('works', queryParameters: params);
+    return response?.data;
   }
 
   /// Searches by tag name.
@@ -295,10 +349,30 @@ class AsmrApi {
   }
 
   Future<Map<String, dynamic>?> getWorkInfo({required String id}) async {
-    return await get('work/$id');
+    final response = await get<Map<String, dynamic>>('work/$id');
+    return response?.data;
   }
 
   Future<List<dynamic>?> getTracks({required String id}) async {
-    return await get('tracks/$id');
+    final response = await get<List<dynamic>>('tracks/$id');
+    return response?.data;
+  }
+
+  Future<Uint8List?> getCoverBytes({required String id}) async {
+    try {
+      // 指定响应类型为二进制
+      final response = await get('cover/$id.jpg',
+          queryParameters: {'type': 'main'},
+          options: Options(responseType: ResponseType.bytes));
+
+      if (response != null) {
+        return Uint8List.fromList(response.data);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      Log.error('Fetch cover image data failed.\n' 'error: $e');
+      return null;
+    }
   }
 }

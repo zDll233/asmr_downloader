@@ -5,7 +5,7 @@ import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart'
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
 import 'package:asmr_downloader/models/track_item.dart';
-import 'package:asmr_downloader/services/ui/ui_service.dart';
+import 'package:asmr_downloader/services/ui/ui_providers.dart';
 import 'package:asmr_downloader/utils/legal_windows_name.dart';
 import 'package:asmr_downloader/utils/log.dart';
 import 'package:dio/dio.dart';
@@ -19,8 +19,9 @@ class DownloadManager {
   DownloadManager(this.ref);
 
   Future<void> run() async {
-    await UIService(ref).resetProgress();
-    ref.read(dlStatusProvider.notifier).state = DownloadStatus.downloading;
+    await ref.read(uiServiceProvider).resetProgress();
+
+    // handle error
 
     final sourceId = ref.read(sourceIdProvider);
     if (sourceId == null) {
@@ -28,34 +29,45 @@ class DownloadManager {
       return;
     }
 
-    final targetDirPath = ref.read(targetDirPathProvider);
-    if (targetDirPath == '-') {
-      Log.warning('Download failed: $sourceId\n'
-          'error: Target download path is empty, which means you have to start downloading after work info is loaded');
-    } else {
-      ref.read(currentDlNoProvider.notifier).state = 0;
-
-      // root Folder cnt
-      int rootFolderTaskCnt = 0;
-      final rootFolderSnapshot = ref.read(rootFolderProvider)?.copyWith();
-      if (rootFolderSnapshot == null) {
-        Log.fatal('Download failed: $sourceId\n' 'error: rootFolder is null');
-      } else {
-        rootFolderTaskCnt = countTotalTask(rootFolderSnapshot);
-        ref.read(totalTaskCntProvider.notifier).state = rootFolderTaskCnt;
-      }
-
-      // download cover
-      if (ref.read(dlCoverProvider)) {
-        ref.read(totalTaskCntProvider.notifier).state++;
-        await _downloadCover(sourceId, p.join(targetDirPath, sourceId));
-      }
-
-      // download root folder
-      if (rootFolderTaskCnt > 0) {
-        await _downloadTrackItem(rootFolderSnapshot!, targetDirPath);
-      }
+    final voiceWorkPath = ref.read(voiceWorkPathProvider);
+    if (voiceWorkPath == '-') {
+      Log.error('Download failed: $sourceId\n'
+          'error: voiceWorkPath is empty, which means you have to start downloading after work info is loaded');
+      return;
     }
+
+    // start downloading
+
+    ref.read(dlStatusProvider.notifier).state = DownloadStatus.downloading;
+    ref.read(currentDlNoProvider.notifier).state = 0;
+
+    // root Folder cnt
+    int rootFolderTaskCnt = 0;
+    final rootFolderSnapshot = ref.read(rootFolderProvider)?.copyWith();
+    if (rootFolderSnapshot == null) {
+      Log.fatal(
+          'Download tracks failed: $sourceId\n' 'error: rootFolder is null');
+    } else {
+      rootFolderTaskCnt = countTotalTask(rootFolderSnapshot);
+      ref.read(totalTaskCntProvider.notifier).state = rootFolderTaskCnt;
+    }
+
+    // download cover
+    if (ref.read(dlCoverProvider)) {
+      ref.read(totalTaskCntProvider.notifier).state++;
+      await _downloadCover(p.join(
+        voiceWorkPath,
+        sourceId,
+        '${sourceId}_cover.jpg',
+      ));
+    }
+
+    // download root folder
+    if (rootFolderTaskCnt > 0) {
+      await _downloadTrackItem(rootFolderSnapshot!, voiceWorkPath);
+    }
+
+    // download completed
 
     ref.read(dlStatusProvider.notifier).state = DownloadStatus.completed;
     await WindowsTaskbar.setFlashTaskbarAppIcon(
@@ -78,26 +90,65 @@ class DownloadManager {
   }
 
   /// 下载cover
-  Future<void> _downloadCover(String sourceId, String sourceIdDirPath) async {
-    final coverUrl = ref.read(coverUrlProvider);
-    final int? coverSize =
-        await ref.read(asmrApiProvider).tryGetContentLength(coverUrl);
+  Future<void> _downloadCover(String savePath) async {
+    final coverName = p.basename(savePath);
+    final coverBytesAsync = ref.read(coverBytesProvider);
 
-    if (coverSize != null) {
-      FileAsset coverFile = FileAsset(
-        id: '${sourceId}_cover',
-        type: 'image',
-        title: '${sourceId}_cover.jpg',
-        mediaStreamUrl: coverUrl,
-        mediaDownloadUrl: coverUrl,
-        size: coverSize,
-        savePath: p.join(sourceIdDirPath, '${sourceId}_cover.jpg'),
-      )..selected = true;
+    if (coverBytesAsync is AsyncData) {
+      final bytes = coverBytesAsync.value;
+      if (bytes != null) {
+        // set download start state
+        ref.read(currentFileNameProvider.notifier).state = coverName;
+        ref.read(processProvider.notifier).state = 0;
+        ref.read(currentDlNoProvider.notifier).state++;
 
-      await _downloadTrackItem(coverFile, sourceIdDirPath);
+        try {
+          // save cover
+          final coverFile = File(savePath);
+          if (!await coverFile.exists()) {
+            await coverFile.create(recursive: true);
+          }
+          if ((await coverFile.length()) != bytes.length) {
+            await coverFile.writeAsBytes(bytes);
+          }
+
+          // set download completed state
+          ref.read(processProvider.notifier).state = 1;
+          await WindowsTaskbar.setProgress(
+              ref.read(currentDlNoProvider), ref.read(totalTaskCntProvider));
+
+          Log.info('Save cover completed: $coverName');
+        } catch (e) {
+          Log.error('Save cover failed: $coverName\n'
+              'error: $e');
+        }
+      } else {
+        Log.error('Save cover failed: $coverName\n'
+            'error: cover bytes is null');
+      }
     } else {
-      Log.error('Download cover failed: ${sourceId}_cover.jpg\n'
-          'error: cover size is null');
+      Log.warning('Save cover failed: $coverName\n'
+          'error: cover bytes is not ready');
+
+      final coverUrl = ref.read(coverUrlProvider);
+      final int? coverSize =
+          await ref.read(asmrApiProvider).tryGetContentLength(coverUrl);
+
+      if (coverSize != null) {
+        FileAsset coverFileAsset = FileAsset(
+          id: coverName,
+          type: 'image',
+          title: coverName,
+          mediaStreamUrl: coverUrl,
+          mediaDownloadUrl: coverUrl,
+          size: coverSize,
+          savePath: savePath,
+        )..selected = true;
+        await _downloadFileAsset(coverFileAsset);
+      } else {
+        Log.error('Download cover failed: $coverName\n'
+            'error: cover size is null');
+      }
     }
   }
 
@@ -133,18 +184,20 @@ class DownloadManager {
       cancelToken: task.cancelToken,
       onReceiveProgress: (received, total) {
         if (total > 0) {
-          task.progress = received / total;
-          ref.read(processProvider.notifier).state = task.progress;
+          final progress = received / total;
+          // task.progress = progress;
+          ref.read(processProvider.notifier).state = progress;
         }
       },
     );
 
     if (dlFlag) {
       // 如果文件已存在，不会调用onReceiveProgress，需要手动设置进度
-      task.status = DownloadStatus.completed;
-      task.progress = 1.0;
-      ref.read(processProvider.notifier).state = 1.0;
 
+      // task.status = DownloadStatus.completed;
+      // task.progress = 1;
+
+      ref.read(processProvider.notifier).state = 1;
       await WindowsTaskbar.setProgress(
           ref.read(currentDlNoProvider), ref.read(totalTaskCntProvider));
     }
