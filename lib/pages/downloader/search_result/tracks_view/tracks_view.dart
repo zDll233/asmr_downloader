@@ -21,6 +21,9 @@ class TracksView extends ConsumerWidget {
         padding: EdgeInsets.only(right: horizontalPadding, bottom: 10.0),
         child: tracksLoadingState.when(
           data: (_) {
+            if (ref.read(workInfoLoadingStateProvider).value == null) {
+              return const Text('No tracks');
+            }
             final rootFolder = ref.read(rootFolderProvider);
             return rootFolder == null
                 ? const Text('No tracks')

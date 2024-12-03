@@ -41,6 +41,7 @@ class UIService {
       // force to refetch
       ref.invalidate(workInfoProvider);
       ref.invalidate(rawTracksProvider);
+      ref.invalidate(coverBytesProvider);
     } else {
       ref.read(searchTextProvider.notifier).state = searchText;
     }

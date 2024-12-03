@@ -71,6 +71,7 @@ final coverUrlProvider = Provider<String>((ref) {
 
 final coverBytesProvider = FutureProvider<Uint8List?>((ref) async {
   final api = ref.watch(asmrApiProvider);
+  
   final id = ref.watch(idProvider);
   if (id == null) {
     return null;

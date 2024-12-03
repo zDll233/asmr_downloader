@@ -30,9 +30,9 @@ class DownloadManager {
     }
 
     final voiceWorkPath = ref.read(voiceWorkPathProvider);
-    if (voiceWorkPath == '-') {
+    if (p.basename(voiceWorkPath) == '-') {
       Log.error('Download failed: $sourceId\n'
-          'error: voiceWorkPath is empty, which means you have to start downloading after work info is loaded');
+          'error: voiceWorkPath is invalid, which means you have to start downloading after work info is loaded');
       return;
     }
 
@@ -117,7 +117,7 @@ class DownloadManager {
           await WindowsTaskbar.setProgress(
               ref.read(currentDlNoProvider), ref.read(totalTaskCntProvider));
 
-          Log.info('Save cover completed: $coverName');
+          Log.info('Save cover completed: $coverName' 'Save path: $savePath');
         } catch (e) {
           Log.error('Save cover failed: $coverName\n'
               'error: $e');

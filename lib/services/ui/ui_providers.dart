@@ -6,12 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final uiServiceProvider = Provider((ref) => UIService(ref));
 
-AsyncValue combineStates(AsyncValue precondition, AsyncValue data) {
-  if (precondition.isRefreshing || data.isRefreshing) {
+AsyncValue combineStates(AsyncValue asyncValue1, AsyncValue asyncValue2) {
+  if (asyncValue1.isRefreshing || asyncValue2.isRefreshing) {
     return const AsyncLoading();
   }
-  return precondition.when(
-    data: (_) => data,
+  return asyncValue1.when(
+    data: (_) => asyncValue2,
     loading: () => const AsyncLoading(),
     error: (error, stack) => AsyncError(error, stack),
   );
