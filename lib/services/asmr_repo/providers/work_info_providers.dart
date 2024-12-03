@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
 import 'package:asmr_downloader/utils/log.dart';
@@ -52,6 +54,17 @@ final coverUrlProvider = Provider<String>((ref) {
     },
     orElse: () => '',
   );
+});
+
+final coverBytesProvider = FutureProvider<Uint8List?>((ref) async {
+  final api = ref.watch(asmrApiProvider);
+  final id = ref.watch(idProvider);
+  if (id == null) {
+    return null;
+  }
+
+  Log.info('Fetch cover bytes: "$id"');
+  return api.getCoverBytes(id: id);
 });
 
 final tagLsProvider = Provider<List<String>>((ref) {

@@ -59,11 +59,12 @@ class UIService {
     return search(clipBoardText);
   }
 
-  void onApiHostChoosed(String? newValue) {
-    if (newValue == null) return;
-    ref.read(apiHostProvider.notifier).state = newValue;
-    ref.read(configFileProvider).addOrUpdate({'apiHost': newValue});
-    ref.read(asmrApiProvider).setApiHost(newValue);
+  void onApiChannelChoosed(String? newValue) {
+    if (newValue == null || newValue == ref.read(apiChannelProvider)) return;
+
+    ref.read(apiChannelProvider.notifier).state = newValue;
+    ref.read(configFileProvider).addOrUpdate({'apiChannel': newValue});
+    ref.read(asmrApiProvider).setApiChannel(newValue);
   }
 
   void onProxyChanged(bool? value) {

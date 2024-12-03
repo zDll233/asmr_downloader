@@ -46,8 +46,8 @@ class _InitializationState extends ConsumerState<Initialization> {
 
 final _initProvider = FutureProvider.autoDispose((ref) async {
   final config = await ref.read(configFileProvider).read();
-  ref.read(apiHostProvider.notifier).state =
-      config['apiHost'] as String? ?? 'asmr-200';
+  ref.read(apiChannelProvider.notifier).state =
+      config['apiChannel'] as String? ?? 'asmr-200';
   ref.read(clashProxyProvider.notifier).state =
       config['clashProxy'] as String? ?? 'DIRECT';
   ref.read(downloadPathProvider.notifier).state =
@@ -55,8 +55,7 @@ final _initProvider = FutureProvider.autoDispose((ref) async {
   ref.read(dlCoverProvider.notifier).state =
       config['dlCover'] as bool? ?? false;
 
-
   ref.read(asmrApiProvider)
-    ..setApiHost(ref.read(apiHostProvider))
+    ..setApiChannel(ref.read(apiChannelProvider))
     ..proxy = ref.read(clashProxyProvider);
 });

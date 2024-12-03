@@ -4,11 +4,14 @@ import 'package:asmr_downloader/models/track_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const double _lPadding = 20.0;
-
 class Tracks extends ConsumerStatefulWidget {
-  const Tracks({super.key, required this.rootFolder});
+  const Tracks({
+    super.key,
+    required this.rootFolder,
+    this.tracksLPadding = 20.0,
+  });
   final Folder rootFolder;
+  final double tracksLPadding;
 
   @override
   ConsumerState<Tracks> createState() => TracksState();
@@ -27,7 +30,7 @@ class TracksState extends ConsumerState<Tracks> {
     if (track is Folder) {
       trackWidgets.add(
         Padding(
-          padding: EdgeInsets.only(left: _lPadding),
+          padding: EdgeInsets.only(left: widget.tracksLPadding),
           child: ExpansionTile(
             leading: Icon(Icons.folder, color: Color(0xFFF9C100)),
             trailing: Checkbox(
@@ -51,7 +54,7 @@ class TracksState extends ConsumerState<Tracks> {
       // FileAsset
       trackWidgets.add(
         Padding(
-          padding: EdgeInsets.only(left: _lPadding),
+          padding: EdgeInsets.only(left: widget.tracksLPadding),
           child: CheckboxListTile(
             value: track.selected,
             onChanged: (bool? newValue) {

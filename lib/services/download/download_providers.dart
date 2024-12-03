@@ -13,7 +13,7 @@ import 'package:path/path.dart' as p;
 
 final downloadManagerProvider = Provider((ref) => DownloadManager(ref));
 
-final targetDirPathProvider = Provider<String>((ref) {
+final voiceWorkPathProvider = Provider<String>((ref) {
   final downloadPath = ref.watch(downloadPathProvider);
   final title = ref.watch(titleProvider);
   final cvLs = ref.watch(cvLsProvider);
