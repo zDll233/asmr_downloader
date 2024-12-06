@@ -1,4 +1,4 @@
-import 'package:asmr_downloader/pages/downloader/search_result/work_info/components/copyable_textbox.dart';
+import 'package:asmr_downloader/pages/components/copyable_textbox.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

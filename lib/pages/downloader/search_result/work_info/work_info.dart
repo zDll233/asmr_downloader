@@ -4,6 +4,7 @@ import 'package:asmr_downloader/pages/downloader/search_result/work_info/compone
 import 'package:asmr_downloader/pages/downloader/search_result/work_info/components/asmr_circle_name.dart';
 import 'package:asmr_downloader/pages/downloader/search_result/work_info/components/asmr_cover.dart';
 import 'package:asmr_downloader/pages/downloader/search_result/work_info/components/asmr_title.dart';
+import 'package:asmr_downloader/pages/window_title_bar/move_window.dart';
 import 'package:asmr_downloader/services/ui/ui_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,20 +29,23 @@ class WorkInfo extends ConsumerWidget {
             if (data == null) {
               return const Text('No work info');
             }
-            return ScrollConfiguration(
-              behavior:
-                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AsmrCover(),
-                    AsmrTitle(verticalPadding: _verticalPadding),
-                    AsmrCircleName(verticalPadding: _verticalPadding),
-                    AsmrMiscInfo(verticalPadding: _verticalPadding),
-                    AsmrTags(verticalPadding: _verticalPadding),
-                    AsmrCv(verticalPadding: _verticalPadding),
-                  ],
+            return MoveWindow(
+              moveOnChildWidget: true,
+              child: ScrollConfiguration(
+                behavior:
+                    ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AsmrCover(),
+                      AsmrTitle(verticalPadding: _verticalPadding),
+                      AsmrCircleName(verticalPadding: _verticalPadding),
+                      AsmrMiscInfo(verticalPadding: _verticalPadding),
+                      AsmrTags(verticalPadding: _verticalPadding),
+                      AsmrCv(verticalPadding: _verticalPadding),
+                    ],
+                  ),
                 ),
               ),
             );

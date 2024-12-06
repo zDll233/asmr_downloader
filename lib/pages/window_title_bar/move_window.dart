@@ -4,25 +4,23 @@ import 'package:window_manager/window_manager.dart';
 class MoveWindow extends StatelessWidget {
   const MoveWindow({
     super.key,
-    this.text,
+    required this.child,
+    this.moveOnChildWidget = false,
   });
-
-  final Text? text;
+  final Widget child;
+  final bool moveOnChildWidget;
 
   @override
   Widget build(BuildContext context) {
-    return DragToMoveArea(
-      child: SizedBox(
-        height: double.infinity,
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.only(left: 16),
-              child: text ?? Container(),
-            ),
-          ],
-        ),
-      ),
-    );
+    if (moveOnChildWidget) {
+      return DragToMoveArea(child: child);
+    } else {
+      return Stack(
+        children: [
+          Positioned.fill(child: DragToMoveArea(child: Container())),
+          child,
+        ],
+      );
+    }
   }
 }

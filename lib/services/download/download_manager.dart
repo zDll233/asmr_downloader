@@ -25,7 +25,7 @@ class DownloadManager {
 
     final sourceId = ref.read(sourceIdProvider);
     if (sourceId == null) {
-      Log.fatal('Download failed\n' 'error: sourId is null');
+      Log.fatal('Download failed\n' 'error: sourceId is null');
       return;
     }
 

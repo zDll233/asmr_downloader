@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:asmr_downloader/pages/components/initialization.dart';
 import 'package:asmr_downloader/pages/downloader/downloader.dart';
+import 'package:asmr_downloader/pages/window_title_bar/move_window.dart';
 import 'package:asmr_downloader/pages/window_title_bar/window_title_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -32,13 +33,16 @@ class MyApp extends StatelessWidget {
         ),
         scrollBehavior: MyCustomScrollBehavior(),
         home: const Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Column(
+          backgroundColor: Colors.transparent,
+          body: MoveWindow(
+            child: Column(
               children: [
                 WindowTitleBar(),
                 Downloader(),
               ],
-            )),
+            ),
+          ),
+        ),
       ),
     );
   }

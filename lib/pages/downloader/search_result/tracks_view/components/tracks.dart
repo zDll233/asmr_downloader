@@ -1,4 +1,5 @@
-import 'package:asmr_downloader/pages/downloader/search_result/tracks_view/components/middle_ellipsis_text.dart';
+import 'package:asmr_downloader/pages/components/middle_ellipsis_text.dart';
+import 'package:asmr_downloader/pages/window_title_bar/move_window.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
 import 'package:asmr_downloader/models/track_item.dart';
 import 'package:flutter/material.dart';
@@ -20,8 +21,23 @@ class Tracks extends ConsumerStatefulWidget {
 class TracksState extends ConsumerState<Tracks> {
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: trackExpansion(widget.rootFolder),
+    final trackExpansionLs = trackExpansion(widget.rootFolder);
+    return CustomScrollView(
+      slivers: [
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) => trackExpansionLs[index],
+            childCount: trackExpansionLs.length,
+          ),
+        ),
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: MoveWindow(
+            //this container will fill the remaining space in the ViewPort
+            child: Container(),
+          ),
+        ),
+      ],
     );
   }
 

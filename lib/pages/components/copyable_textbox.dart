@@ -14,8 +14,7 @@ class CopyableTextBox extends StatelessWidget {
     this.textStyle,
     this.backgroundColor = Colors.transparent,
     this.borderRadius = 5.0,
-    this.padding =
-        const EdgeInsets.only(left: 7.0, right: 7.0, top: 2.0, bottom: 2.0),
+    this.padding = const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
   });
 
   @override

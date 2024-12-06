@@ -44,4 +44,4 @@ app.*.map.json
 
 asmr_dl_config.json
 
-copy_release.bat
+_build.bat
