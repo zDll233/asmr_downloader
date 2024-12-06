@@ -4,8 +4,9 @@ import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart'
 import 'package:asmr_downloader/services/asmr_repo/providers/tracks_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
+import 'package:asmr_downloader/utils/system_proxy_config.dart';
+import 'package:asmr_downloader/utils/tool_functions.dart';
 import 'package:asmr_downloader/utils/log.dart';
-import 'package:asmr_downloader/utils/source_id_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -71,13 +72,17 @@ class UIService {
     ref.read(asmrApiProvider).setApiChannel(newValue);
   }
 
-  void onProxyChanged(bool? value) {
+  Future<void> onProxyChanged(bool? value) async {
     if (value == null) {
       return;
     }
-    final proxy = value ? 'PROXY 127.0.0.1:7890' : 'DIRECT';
-    ref.read(clashProxyProvider.notifier).state = proxy;
-    ref.read(configFileProvider).addOrUpdate({'clashProxy': proxy});
+
+    final proxy = value ? SystemProxyConfig.systemProxy : 'DIRECT';
+
+    if (proxy == ref.read(proxyProvider)) return;
+
+    ref.read(proxyProvider.notifier).state = proxy;
+    ref.read(configFileProvider).addOrUpdate({'proxy': proxy});
     ref.read(asmrApiProvider).proxy = proxy;
   }
 

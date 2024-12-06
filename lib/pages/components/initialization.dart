@@ -1,5 +1,6 @@
 import 'package:asmr_downloader/common/config_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart';
+import 'package:asmr_downloader/utils/system_proxy_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -46,16 +47,27 @@ class _InitializationState extends ConsumerState<Initialization> {
 
 final _initProvider = FutureProvider.autoDispose((ref) async {
   final config = await ref.read(configFileProvider).read();
+
+  // api channel and proxy
+
   ref.read(apiChannelProvider.notifier).state =
       config['apiChannel'] as String? ?? 'asmr-200';
-  ref.read(clashProxyProvider.notifier).state =
-      config['clashProxy'] as String? ?? 'DIRECT';
+
+  final savedProxy = config['proxy'];
+  if (savedProxy != null && savedProxy != 'DIRECT') {
+    final proxy = SystemProxyConfig.systemProxy;
+    ref.read(proxyProvider.notifier).state = proxy;
+    ref.read(configFileProvider).addOrUpdate({'proxy': proxy});
+  }
+
+  ref.read(asmrApiProvider)
+    ..setApiChannel(ref.read(apiChannelProvider))
+    ..proxy = ref.read(proxyProvider);
+
+  // misc
+
   ref.read(downloadPathProvider.notifier).state =
       config['dlPath'] as String? ?? '';
   ref.read(dlCoverProvider.notifier).state =
       config['dlCover'] as bool? ?? false;
-
-  ref.read(asmrApiProvider)
-    ..setApiChannel(ref.read(apiChannelProvider))
-    ..proxy = ref.read(clashProxyProvider);
 });

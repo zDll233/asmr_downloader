@@ -9,6 +9,6 @@ final downloadPathProvider = StateProvider<String>((ref) => '');
 
 final dlCoverProvider = StateProvider<bool>((ref) => false);
 
-final clashProxyProvider = StateProvider<String>((ref) => 'DIRECT');
+final proxyProvider = StateProvider<String>((ref) => 'DIRECT');
 
 final apiChannelProvider = StateProvider<String>((ref) => 'asmr-200');

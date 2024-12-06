@@ -3,20 +3,20 @@ import 'package:asmr_downloader/services/ui/ui_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ClashProxy extends ConsumerWidget {
-  const ClashProxy({super.key});
+class AsmrProxy extends ConsumerWidget {
+  const AsmrProxy({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final clashProxy = ref.watch(clashProxyProvider);
+    final proxy = ref.watch(proxyProvider);
     return SizedBox(
       child: Padding(
         padding: const EdgeInsets.only(left: 20.0),
         child: Row(
           children: [
-            const Text('clash代理'),
+            const Text('启用代理'),
             Checkbox(
-              value: clashProxy != 'DIRECT',
+              value: proxy != 'DIRECT',
               onChanged: ref.read(uiServiceProvider).onProxyChanged,
             ),
           ],

@@ -5,8 +5,8 @@ import 'package:asmr_downloader/services/asmr_repo/providers/api_providers.dart'
 import 'package:asmr_downloader/services/asmr_repo/providers/tracks_providers.dart';
 import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
 import 'package:asmr_downloader/services/download/download_manager.dart';
-import 'package:asmr_downloader/utils/legal_windows_name.dart';
 import 'package:asmr_downloader/utils/log.dart';
+import 'package:asmr_downloader/utils/tool_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:path/path.dart' as p;
