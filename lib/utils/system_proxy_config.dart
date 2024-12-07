@@ -36,6 +36,10 @@ class SystemProxyConfig {
                   Pointer<WINHTTP_CURRENT_USER_IE_PROXY_CONFIG> pProxyConfig)>(
           'WinHttpGetIEProxyConfigForCurrentUser');
 
+  static final _GlobalFree = DynamicLibrary.open('kernel32.dll').lookupFunction<
+      Pointer<Void> Function(Pointer<Void> mem),
+      Pointer<Void> Function(Pointer<Void> mem)>('GlobalFree');
+
   factory SystemProxyConfig.getConfig() {
     final proxyConfig = calloc<WINHTTP_CURRENT_USER_IE_PROXY_CONFIG>();
 
@@ -43,20 +47,29 @@ class SystemProxyConfig {
       final result = _WinHttpGetIEProxyConfigForCurrentUser(proxyConfig);
 
       if (result != 0) {
-        final config = proxyConfig.ref;
+        final configRef = proxyConfig.ref;
+        final systemProxyConfig = SystemProxyConfig();
 
-        return SystemProxyConfig(
-          fAutoDetect: config.fAutoDetect != 0,
-          autoConfigUrl: config.lpszAutoConfigUrl != nullptr
-              ? config.lpszAutoConfigUrl.toDartString()
-              : null,
-          proxy: config.lpszProxy != nullptr
-              ? config.lpszProxy.toDartString()
-              : null,
-          proxyBypass: config.lpszProxyBypass != nullptr
-              ? config.lpszProxyBypass.toDartString()
-              : null,
-        );
+        systemProxyConfig.fAutoDetect = configRef.fAutoDetect != 0;
+
+        if (configRef.lpszAutoConfigUrl != nullptr) {
+          systemProxyConfig.autoConfigUrl =
+              configRef.lpszAutoConfigUrl.toDartString();
+          _GlobalFree(configRef.lpszAutoConfigUrl.cast());
+        }
+
+        if (configRef.lpszProxy != nullptr) {
+          systemProxyConfig.proxy = configRef.lpszProxy.toDartString();
+          _GlobalFree(configRef.lpszProxy.cast());
+        }
+
+        if (configRef.lpszProxyBypass != nullptr) {
+          systemProxyConfig.proxyBypass =
+              configRef.lpszProxyBypass.toDartString();
+          _GlobalFree(configRef.lpszProxyBypass.cast());
+        }
+
+        return systemProxyConfig;
       } else {
         Log.error('Failed to get system proxy config');
         return SystemProxyConfig();
