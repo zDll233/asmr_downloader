@@ -65,7 +65,7 @@ class MinimizeButton extends ConsumerWidget {
   }
 }
 
-class MaximizeButton extends StatefulWidget {
+class MaximizeButton extends ConsumerStatefulWidget {
   const MaximizeButton({
     super.key,
     this.minWidth = 46.0,
@@ -76,10 +76,11 @@ class MaximizeButton extends StatefulWidget {
   final double minHeight;
 
   @override
-  State<MaximizeButton> createState() => _MaximizeButtonState();
+  ConsumerState<MaximizeButton> createState() => _MaximizeButtonState();
 }
 
-class _MaximizeButtonState extends State<MaximizeButton> with WindowListener {
+class _MaximizeButtonState extends ConsumerState<MaximizeButton>
+    with WindowListener {
   @override
   void initState() {
     super.initState();
@@ -109,6 +110,11 @@ class _MaximizeButtonState extends State<MaximizeButton> with WindowListener {
   }
 
   @override
+  void onWindowClose() {
+    ref.read(uiServiceProvider).onExit(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
       future: windowManager.isMaximized(),
@@ -116,9 +122,7 @@ class _MaximizeButtonState extends State<MaximizeButton> with WindowListener {
         return snapshot.data == true
             ? WindowButton(
                 iconName: _kIconChromeUnmaximize,
-                onPressed: () async {
-                  windowManager.unmaximize();
-                },
+                onPressed: () => windowManager.unmaximize(),
                 buttonBgColorScheme: _buttonBgColorScheme,
                 buttonIconColorScheme: _buttonIconColorScheme,
                 minWidth: widget.minWidth,
@@ -126,9 +130,7 @@ class _MaximizeButtonState extends State<MaximizeButton> with WindowListener {
               )
             : WindowButton(
                 iconName: _kIconChromeMaximize,
-                onPressed: () async {
-                  windowManager.maximize();
-                },
+                onPressed: () => windowManager.maximize(),
                 buttonBgColorScheme: _buttonBgColorScheme,
                 buttonIconColorScheme: _buttonIconColorScheme,
                 minWidth: widget.minWidth,
@@ -153,7 +155,7 @@ class CloseBtn extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return WindowButton(
       iconName: _kIconChromeClose,
-      onPressed: () => ref.read(uiServiceProvider).onExit(context),
+      onPressed: () => windowManager.close(),
       buttonBgColorScheme: _closeButtonBgColorScheme,
       buttonIconColorScheme: _closeButtonIconColorScheme,
       minWidth: minWidth,

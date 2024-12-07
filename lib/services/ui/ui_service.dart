@@ -105,29 +105,39 @@ class UIService {
     Log.info('dlPath: $dlPath');
   }
 
-  void onExit(BuildContext context) {
+  Future<void> onExit(BuildContext context) async {
     if (DownloadStatus.downloading == ref.read(dlStatusProvider)) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('文件下载中'),
-            content: const Text('你确定要关闭吗？下载将被取消，再次下载会继承已下载的部分。'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => windowManager.close(),
-                child: const Text('关闭'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('取消'),
-              ),
-            ],
-          );
-        },
-      );
+      await windowManager.show();
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('文件下载中'),
+              content: const Text('你确定要关闭吗？下载将被取消，再次下载会继承已下载的部分。'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    // 不要用windowManager.destroy()，有明显的卡顿
+                    windowManager
+                      ..setPreventClose(false)
+                      ..close();
+                  },
+                  child: const Text('关闭'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('取消'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     } else {
-      windowManager.close();
+      windowManager
+        ..setPreventClose(false)
+        ..close();
     }
   }
 }

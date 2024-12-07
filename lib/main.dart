@@ -30,7 +30,7 @@ Future<void> setupWindow(List<String> args) async {
         ..setMinimumSize(initialSize)
         ..setTitle('AsmrDownloader')
         ..show()
-        ..focus();
+        ..setPreventClose(true);
     });
   }
 }
