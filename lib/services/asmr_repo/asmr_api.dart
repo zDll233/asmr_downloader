@@ -47,10 +47,7 @@ class AsmrApi {
     );
   }
 
-  AsmrApi({
-    String initialProxy = 'DIRECT',
-    String initialApiChannel = 'asmr-200',
-  }) {
+  AsmrApi() {
     _apiDio = Dio(BaseOptions(
       connectTimeout: Duration(seconds: 5),
       receiveTimeout: Duration(seconds: 10),
@@ -61,9 +58,6 @@ class AsmrApi {
       receiveTimeout: Duration(seconds: 10),
       sendTimeout: Duration(seconds: 10),
     ));
-
-    proxy = initialProxy;
-    setApiChannel(initialApiChannel);
   }
 
   void setApiChannel(String apiChannel) {
