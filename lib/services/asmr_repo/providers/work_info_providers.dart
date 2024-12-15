@@ -13,8 +13,8 @@ final workInfoProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
     return null;
   }
 
-  Log.info('Fetch workInfo. id: $id');
-  return api.getWorkInfo(id: id);
+  Log.info('fetch workInfo, id: $id');
+  return api.getWorkInfo(id);
 });
 
 final titleProvider = Provider<String>((ref) {
@@ -72,13 +72,13 @@ final coverUrlProvider = Provider<String>((ref) {
 final coverBytesProvider = FutureProvider<Uint8List?>((ref) async {
   final api = ref.watch(asmrApiProvider);
   
-  final id = ref.watch(idProvider);
-  if (id == null) {
+  final coverUrl = ref.watch(coverUrlProvider);
+  if (coverUrl.isEmpty) {
     return null;
   }
 
-  Log.info('Fetch cover bytes. id: $id');
-  return api.getCoverBytes(id: id);
+  Log.info('fetch cover bytes, url: $coverUrl');
+  return api.getCoverBytes(coverUrl);
 });
 
 final tagLsProvider = Provider<List<String>>((ref) {

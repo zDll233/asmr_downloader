@@ -11,7 +11,7 @@ class Log {
     if (kDebugMode) {
       _logger = Logger(
         printer: PrettyPrinter(
-          methodCount: 5,
+          methodCount: 0,
           dateTimeFormat: DateTimeFormat.dateAndTime,
         ),
       );

@@ -14,7 +14,7 @@ class JsonStorage {
       final contents = await file.readAsString();
       return json.decode(contents) as Map<String, dynamic>;
     } catch (e) {
-      Log.error('Error reading: $filePath\n' 'error: $e');
+      Log.error('read "$filePath" failed\n' 'error: $e');
       return {};
     }
   }

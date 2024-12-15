@@ -12,9 +12,13 @@ List<Widget> ellipsisInMiddle(String nameWithExt) {
         child: Text(
           name,
           overflow: TextOverflow.ellipsis,
+          style: const TextStyle(height: 1),
         ),
       ),
-      Text(ext),
+      Text(
+        ext,
+        style: const TextStyle(height: 1),
+      ),
     ];
   }
 }

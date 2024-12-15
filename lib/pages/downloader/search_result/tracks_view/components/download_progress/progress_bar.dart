@@ -19,13 +19,11 @@ class ProgressBar extends ConsumerWidget {
           borderRadius: BorderRadius.circular(10),
           value: process,
         ),
-        Positioned(
-            top: 3.5,
-            left: 5,
-            child: SizedBox(
-              width: appWidth * 0.34,
-              child: Row(children: ellipsisInMiddle(currentFileName)),
-            )),
+        Positioned.fill(
+          left: 5,
+          right: 5,
+          child: Row(children: ellipsisInMiddle(currentFileName)),
+        ),
       ]),
     );
   }

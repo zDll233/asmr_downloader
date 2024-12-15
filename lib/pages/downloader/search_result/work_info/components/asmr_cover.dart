@@ -1,5 +1,5 @@
-import 'package:asmr_downloader/services/asmr_repo/providers/work_info_providers.dart';
 import 'package:asmr_downloader/services/download/download_providers.dart';
+import 'package:asmr_downloader/services/ui/ui_providers.dart';
 import 'package:asmr_downloader/utils/log.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,8 +10,8 @@ class AsmrCover extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final coverBytes = ref.watch(coverBytesProvider);
-    return coverBytes.when(
+    final coverLoadingState = ref.watch(coverLoadingStateProvider);
+    return coverLoadingState.when(
       data: (bytes) {
         if (bytes == null) {
           return const Icon(Icons.error, color: Colors.red);
@@ -20,9 +20,13 @@ class AsmrCover extends ConsumerWidget {
             placeholder: MemoryImage(kTransparentImage),
             image: MemoryImage(bytes));
       },
-      loading: () => const SizedBox.shrink(),
+      loading: () => const SizedBox(
+        width: 24,
+        height: 24,
+        child: CircularProgressIndicator(strokeWidth: 2.0),
+      ),
       error: (error, stack) {
-        Log.error('Load cover image failed\n'
+        Log.error('load cover image failed\n'
             'sourceId: ${ref.read(sourceIdProvider)}\n'
             'error: ');
         return const Icon(Icons.error, color: Colors.red);

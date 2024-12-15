@@ -31,7 +31,7 @@ final searchResultProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
     return null;
   }
 
-  Log.info('Search $searchText');
+  Log.info('search $searchText');
   final api = ref.watch(asmrApiProvider);
   return api.search(content: searchText);
 });

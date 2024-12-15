@@ -25,13 +25,13 @@ class DownloadManager {
 
     final sourceId = ref.read(sourceIdProvider);
     if (sourceId == null) {
-      Log.fatal('Download failed\n' 'error: sourceId is null');
+      Log.fatal('download failed\n' 'error: sourceId is null');
       return;
     }
 
     final voiceWorkPath = ref.read(voiceWorkPathProvider);
     if (p.basename(voiceWorkPath) == '-') {
-      Log.error('Download failed: $sourceId\n'
+      Log.error('download failed: $sourceId\n'
           'error: voiceWorkPath is invalid, which means you have to start downloading after work info is loaded');
       return;
     }
@@ -46,7 +46,7 @@ class DownloadManager {
     final rootFolderSnapshot = ref.read(rootFolderProvider)?.copyWith();
     if (rootFolderSnapshot == null) {
       Log.fatal(
-          'Download tracks failed: $sourceId\n' 'error: rootFolder is null');
+          'download tracks failed: $sourceId\n' 'error: rootFolder is null');
     } else {
       rootFolderTaskCnt = countTotalTask(rootFolderSnapshot);
       ref.read(totalTaskCntProvider.notifier).state = rootFolderTaskCnt;
@@ -93,41 +93,36 @@ class DownloadManager {
   Future<void> _downloadCover(String savePath) async {
     final coverName = p.basename(savePath);
     final coverBytesAsync = ref.read(coverBytesProvider);
+    final bytes = coverBytesAsync.value;
 
-    if (coverBytesAsync is AsyncData) {
-      final bytes = coverBytesAsync.value;
-      if (bytes != null) {
-        // set download start state
-        ref.read(currentFileNameProvider.notifier).state = coverName;
-        ref.read(processProvider.notifier).state = 0;
-        ref.read(currentDlNoProvider.notifier).state++;
+    if (coverBytesAsync is AsyncData && bytes != null) {
+      // set download start state
+      ref.read(currentFileNameProvider.notifier).state = coverName;
+      ref.read(processProvider.notifier).state = 0;
+      ref.read(currentDlNoProvider.notifier).state++;
 
-        try {
-          // save cover
-          final coverFile = File(savePath);
-          if (!await coverFile.exists()) {
-            await coverFile.create(recursive: true);
-          }
-          if ((await coverFile.length()) != bytes.length) {
-            await coverFile.writeAsBytes(bytes);
-          }
-
-          // set download completed state
-          ref.read(processProvider.notifier).state = 1;
-          await WindowsTaskbar.setProgress(
-              ref.read(currentDlNoProvider), ref.read(totalTaskCntProvider));
-
-          Log.info('Save cover completed: $coverName' 'Save path: $savePath');
-        } catch (e) {
-          Log.error('Save cover failed: $coverName\n'
-              'error: $e');
+      try {
+        // save cover
+        final coverFile = File(savePath);
+        if (!await coverFile.exists()) {
+          await coverFile.create(recursive: true);
         }
-      } else {
-        Log.error('Save cover failed: $coverName\n'
-            'error: cover bytes is null');
+        if ((await coverFile.length()) != bytes.length) {
+          await coverFile.writeAsBytes(bytes);
+        }
+
+        // set download completed state
+        ref.read(processProvider.notifier).state = 1;
+        await WindowsTaskbar.setProgress(
+            ref.read(currentDlNoProvider), ref.read(totalTaskCntProvider));
+
+        Log.info('save cover completed: $coverName' 'savePath: $savePath');
+      } catch (e) {
+        Log.error('save cover failed: $coverName\n'
+            'error: $e');
       }
     } else {
-      Log.warning('Save cover failed: $coverName\n'
+      Log.warning('save cover failed: $coverName\n'
           'error: cover bytes is not ready');
 
       final coverUrl = ref.read(coverUrlProvider);
@@ -146,7 +141,7 @@ class DownloadManager {
         )..selected = true;
         await _downloadFileAsset(coverFileAsset);
       } else {
-        Log.error('Download cover failed: $coverName\n'
+        Log.error('download cover failed: $coverName\n'
             'error: cover size is null');
       }
     }
@@ -214,7 +209,7 @@ class DownloadManager {
   }
 
   Future<bool> _resumableDownload(
-    String urlPath,
+    String url,
     String savePath,
     int fileSize, {
     CancelToken? cancelToken,
@@ -249,23 +244,23 @@ class DownloadManager {
 
         if (downloadedBytes < fileSize) {
           if (downloadedBytes == 0) {
-            Log.info('Start downloading: $fileName\n'
-                'URL: $urlPath\n'
-                'Save path: $savePath');
+            Log.info('start downloading: $fileName\n'
+                'url: $url\n'
+                'savePath: $savePath');
             await ref.read(asmrApiProvider).download(
-                  urlPath,
+                  url,
                   savePath,
                   cancelToken: cancelToken,
                   deleteOnError: false,
                   onReceiveProgress: onReceiveProgress,
                 );
           } else {
-            Log.info('Resume downloading: $fileName\n'
+            Log.info('resume downloading: $fileName\n'
                 'downloadedBytes: $downloadedBytes, fileSize: $fileSize\n'
-                'URL: $urlPath\n'
-                'Save path: $savePath');
+                'url: $url\n'
+                'savePath: $savePath');
             await ref.read(asmrApiProvider).download(
-              urlPath,
+              url,
               tmpSavePath,
               cancelToken: cancelToken,
               deleteOnError: false,
@@ -280,27 +275,27 @@ class DownloadManager {
           if (fileSize == 0) {
             await file.create();
           }
-          Log.info('Download completed: $fileName');
+          Log.info('download completed: $fileName');
           return true;
         } else {
           // downloadedBytes > fileSize
 
-          Log.error('Download failed: $fileName\n'
+          Log.error('download failed: $fileName\n'
               'error: downloadedBytes > fileSize');
           return false;
         }
       } on DioException catch (e) {
         if (e.response?.statusCode == 416) {
-          Log.error('Download failed: $fileName\n'
+          Log.error('download failed: $fileName\n'
               'statusCode = 416, range incorrect\n'
               'error: $e');
           return false;
         }
 
-        Log.warning('Download failed: $fileName\n' 'error: $e');
+        Log.warning('download failed: $fileName\n' 'error: $e');
         await Future.delayed(Duration(seconds: 3));
       } catch (e) {
-        Log.error('Download failed: $fileName\n' 'Unhandled error: $e');
+        Log.error('download failed: $fileName\n' 'unhandled error: $e');
         return false;
       } finally {
         await mergeFile(file, tmpFile);
