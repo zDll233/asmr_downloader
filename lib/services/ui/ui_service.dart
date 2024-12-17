@@ -34,9 +34,7 @@ class UIService {
     await resetProgress();
 
     final searchText = normalizeInput(input);
-    if (!isSourceIdValid(searchText)) {
-      return null;
-    }
+    if (!isSourceIdValid(searchText)) return null;
 
     if (searchText == ref.read(searchTextProvider)) {
       // force to refetch
@@ -51,9 +49,7 @@ class UIService {
 
   Future<String?> pasteAndSearch() async {
     final clipBoardText = (await Clipboard.getData('text/plain'))?.text;
-    if (clipBoardText == null) {
-      return null;
-    }
+    if (clipBoardText == null) return null;
 
     // set old sourceId to clipboard
     final oldSourceId = ref.read(sourceIdProvider);
@@ -73,9 +69,7 @@ class UIService {
   }
 
   Future<void> onProxyChanged(bool? value) async {
-    if (value == null) {
-      return;
-    }
+    if (value == null) return;
 
     final proxy = value ? SystemProxyConfig.systemProxy : 'DIRECT';
 
@@ -87,9 +81,8 @@ class UIService {
   }
 
   void onDlCoverChanged(bool? value) {
-    if (value == null) {
-      return;
-    }
+    if (value == null) return;
+
     ref.read(dlCoverProvider.notifier).state = value;
     ref.read(configFileProvider).addOrUpdate({'dlCover': value});
     Log.info('dlCover: $value');
@@ -97,9 +90,8 @@ class UIService {
 
   Future<void> pickDlPath() async {
     final dlPath = await FilePicker.platform.getDirectoryPath();
-    if (dlPath == null) {
-      return;
-    }
+    if (dlPath == null) return;
+
     ref.read(downloadPathProvider.notifier).state = dlPath;
     ref.read(configFileProvider).addOrUpdate({'dlPath': dlPath});
     Log.info('dlPath: $dlPath');
